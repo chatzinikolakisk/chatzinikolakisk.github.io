@@ -60,10 +60,17 @@
   // Initialize theme on page load
   function initTheme() {
     const savedTheme = getTheme();
-    applyTheme(savedTheme);
     
-    // Wait for DOM to be ready
+    // Apply theme immediately to avoid flash
+    if (savedTheme === LIGHT) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    
+    // Wait for DOM to be ready for icon updates
     document.addEventListener('DOMContentLoaded', function() {
+      updateIconVisibility(savedTheme);
       updateToggleButton(savedTheme);
       
       // Add click listener to toggle button
