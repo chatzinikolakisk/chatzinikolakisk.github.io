@@ -198,18 +198,11 @@ blockquote {
       display: block;
       position: absolute;
       top: 100%;
-      left: 0;
       right: 0;
+      left: auto;
       background-color: var(--bg-secondary);
       border: 1px solid var(--border-color);
-      border-top: none;
-      padding: 16px;
       z-index: 100;
-    }
-    
-    .nav-trigger:checked ~ .trigger .page-link {
-      display: block;
-      padding: 8px 0;
     }
   }
   
