@@ -144,7 +144,7 @@ blockquote {
     left: 50%;
     transform: translate(-50%, -50%);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0.3;
+    opacity: 0;
     scale: 0.8;
     
     &.active {
@@ -159,10 +159,10 @@ blockquote {
   }
   
   .moon-icon {
-    color: var(--nord8);
+    color: var(--nord10);
     
     &.active {
-      filter: drop-shadow(0 0 4px var(--nord8));
+      filter: drop-shadow(0 0 4px var(--nord10));
     }
   }
 
