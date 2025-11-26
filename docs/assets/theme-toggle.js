@@ -40,11 +40,11 @@
     
     if (moonIcon && sunIcon) {
       if (theme === LIGHT) {
-        moonIcon.classList.remove('active');
-        sunIcon.classList.add('active');
+          sunIcon.classList.remove('active');
+          moonIcon.classList.add('active');
       } else {
-        moonIcon.classList.add('active');
-        sunIcon.classList.remove('active');
+          sunIcon.classList.add('active');
+          moonIcon.classList.remove('active');
       }
     }
   }
@@ -53,7 +53,7 @@
   function updateToggleButton(theme) {
     const button = document.querySelector('.theme-toggle');
     if (button) {
-      button.setAttribute('aria-label', `Switch to ${theme === DARK ? 'light' : 'dark'} theme`);
+      button.setAttribute('aria-label', `Switch to ${theme === DARK ? 'dark' : 'light'} theme`);
     }
   }
   

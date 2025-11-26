@@ -84,13 +84,7 @@ body {
   }
 }
 
-.site-nav .page-link {
-  color: var(--text-primary);
-}
-
-.post-title, .page-heading {
-  color: var(--text-secondary);
-}
+.post-title, .page-heading { color: var(--text-secondary); }
 
 a {
   color: var(--accent);
@@ -119,7 +113,7 @@ blockquote {
   color: var(--text-primary);
 }
 
-// Minimal theme toggle button (inspired by Nord theme site)
+// Theme toggle button
 .theme-toggle {
   background: transparent;
   border: none;
@@ -129,50 +123,73 @@ blockquote {
   border-radius: 6px;
   transition: background-color 0.2s ease;
   position: relative;
-  overflow: hidden;
   width: 32px;
   height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  vertical-align: middle;
   
   &:hover {
     background-color: var(--bg-tertiary);
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
-  
+
   // Icons
   .theme-icon {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 16px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0;
+    opacity: 0.3;
     scale: 0.8;
     
     &.active {
       opacity: 1;
       scale: 1;
     }
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
   }
   
   .moon-icon {
     color: var(--nord8);
+    
+    &.active {
+      filter: drop-shadow(0 0 4px var(--nord8));
+    }
   }
-  
+
   .sun-icon {
     color: var(--nord13);
+    
+    &.active {
+      filter: drop-shadow(0 0 4px var(--nord13));
+    }
   }
 }
 
-// Ensure toggle aligns with nav items
+// Navigation alignment
 .site-nav .trigger {
   display: flex;
   align-items: center;
+}
+
+// Mobile navigation
+@media screen and (max-width: 600px) {
+  .site-nav, .site-nav .trigger {
+    background-color: var(--bg-secondary) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  .menu-icon > svg {
+    fill: var(--text-primary) !important;
+  }
 }
