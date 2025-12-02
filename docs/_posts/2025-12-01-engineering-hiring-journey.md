@@ -74,4 +74,4 @@ At TalentLMS, we're always trying new things and learning as we go. If that soun
 
 ---
 
-Originally posted in the [TalentLMS Tech Blog](https://blog.talentlms.io/)
+Originally posted in the [TalentLMS Tech Blog](https://blog.talentlms.io)
