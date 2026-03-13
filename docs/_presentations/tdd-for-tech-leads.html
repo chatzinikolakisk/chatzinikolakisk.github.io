@@ -338,11 +338,11 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
             <div>
                 <span class="tag tag-green">Tech Lead School · Session 3</span>
             </div>
-            <h1 style="margin-top:0.3em;">The Test Pyramid<br>& <span class="green">Test-Driven Development</span></h1>
+            <h1 style="margin-top:0.3em;">The Test Pyramid<br>& <span class="green">Writing Unit-Testable Code</span></h1>
             <hr class="sep" style="margin:0.6em auto;">
-            <p class="muted" style="font-size:0.6em;">Building confidence through testing strategy</p>
+            <p class="muted" style="font-size:0.6em;">Shifting from "we have tests" to "our tests make us better engineers"</p>
             <aside class="notes">
-                Welcome to session 3. Today we'll cover two related topics: the test pyramid as a framework for WHERE to invest in testing, and TDD as a practice for HOW to write tests. Both are essential tools in a tech lead's toolkit.
+                Welcome to session 3. You already know what tests are. You're already writing them. Today isn't about convincing you to test — it's about shifting how you think about what a test actually is, and what writing the right kind of test forces you to do to your code.
             </aside>
         </section>
 
@@ -354,9 +354,9 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
                 <span class="tag tag-blue">Part 1</span>
                 <h2>The Test Pyramid</h2>
                 <hr class="sep">
-                <p class="muted" style="font-size:0.7em;">A cost model for testing investment</p>
+                <p class="muted" style="font-size:0.7em;">Most teams have it upside down — and don't know it</p>
                 <aside class="notes">
-                    The test pyramid isn't just a diagram — it's a decision-making tool. As a tech lead, you need to think about how your team allocates testing effort.
+                    The test pyramid is a decision-making tool, but more importantly it's a mirror. Most teams look at it and think they're doing fine. They're not. They're mostly writing integration tests and calling them unit tests. Let's look at why that matters.
                 </aside>
             </section>
         </section>
@@ -366,7 +366,7 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
             <h2>Three Layers</h2>
             <hr class="sep">
             <div class="pyramid-container">
-                <svg width="520" height="320" viewBox="0 0 520 320">
+                <svg width="620" height="320" viewBox="0 0 620 320">
                     <!-- E2E layer -->
                     <polygon points="260,20 350,110 170,110" fill="rgba(248,113,113,0.15)" stroke="#f87171" stroke-width="2"/>
                     <text x="260" y="78" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="14" font-weight="700">E2E / UI</text>
@@ -380,11 +380,11 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
                     <text x="260" y="275" text-anchor="middle" fill="#34d399" font-family="JetBrains Mono" font-size="14" font-weight="700">Unit Tests</text>
 
                     <!-- Labels on right side -->
-                    <text x="440" y="78" fill="#94a3b8" font-family="DM Sans" font-size="12">Slow, expensive</text>
-                    <text x="440" y="95" fill="#94a3b8" font-family="DM Sans" font-size="12">but high confidence</text>
+                    <text x="500" y="78" fill="#94a3b8" font-family="DM Sans" font-size="12">Slow, brittle,</text>
+                    <text x="500" y="95" fill="#94a3b8" font-family="DM Sans" font-size="12">use sparingly</text>
 
-                    <text x="440" y="275" fill="#94a3b8" font-family="DM Sans" font-size="12">Fast, cheap</text>
-                    <text x="440" y="292" fill="#94a3b8" font-family="DM Sans" font-size="12">and reliable</text>
+                    <text x="500" y="267" fill="#94a3b8" font-family="DM Sans" font-size="12">Fast, isolated,</text>
+                    <text x="500" y="284" fill="#94a3b8" font-family="DM Sans" font-size="12">design signal lives here</text>
 
                     <!-- Arrow on left -->
                     <line x1="25" y1="290" x2="25" y2="40" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)"/>
@@ -393,7 +393,7 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
                 </svg>
             </div>
             <aside class="notes">
-                Three layers, each with different tradeoffs. Unit tests at the base: fast, cheap, isolated — test a single function or class. Integration in the middle: test how components work together, like your service talking to a database. E2E at the top: test the whole system end-to-end, like a real user flow. The pyramid shape tells you WHERE to invest most.
+                Three layers. The pyramid shape tells you WHERE to invest most — the base. But most teams flip this instinctively. They write integration tests because they feel more real, more complete. And unit tests feel trivial. That instinct is wrong, and we'll get into exactly why.
             </aside>
         </section>
 
@@ -437,18 +437,18 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
 
         <!-- IT'S A COST MODEL -->
         <section>
-            <h2>It's a <span class="green">cost model</span></h2>
+            <h2>Cost is only <span class="green">half the story</span></h2>
             <hr class="sep">
             <div class="two-col">
                 <div>
-                    <p style="font-size:0.75em;">Every test you write has a <strong>maintenance cost</strong>:</p>
+                    <p style="font-size:0.75em;">Every test has a <strong>maintenance cost</strong>:</p>
                     <ul>
                         <li><strong class="green">Unit:</strong> milliseconds to run, easy to fix</li>
                         <li><strong class="amber">Integration:</strong> seconds to run, moderate setup</li>
                         <li><strong class="red">E2E:</strong> minutes to run, brittle, hard to debug</li>
                     </ul>
                     <p style="font-size:0.65em; margin-top:0.8em;" class="muted">
-                        The pyramid tells you: <strong style="color:var(--text-primary);">invest most where the cost is lowest</strong>
+                        But the bigger point: an integration test can <strong style="color:var(--text-primary);">pass while your design is still bad</strong>. A unit test can't.
                     </p>
                 </div>
                 <div class="card" style="text-align:center;">
@@ -468,7 +468,7 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
                 </div>
             </div>
             <aside class="notes">
-                The pyramid isn't about dogma — it's about economics. Unit tests cost almost nothing to run and are easy to maintain. E2E tests are expensive: slow to run, brittle, hard to debug when they fail. So you want the bulk of your coverage at the unit level. This doesn't mean E2E isn't valuable — it absolutely is for critical paths. But it shouldn't be your primary testing strategy.
+                Cost matters, but it's not the most important thing. Here's what is: integration tests give you false confidence about your design. They tell you "these pieces work together" but not "this code is well-structured." A unit test is brutal — if your code is badly designed, you'll feel it immediately when you try to write one.
             </aside>
         </section>
 
@@ -503,30 +503,30 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
                     <p class="red" style="font-size:0.6em; font-weight:700;">✗ Ice Cream Cone</p>
                 </div>
             </div>
-            <p class="muted" style="font-size:0.6em; text-align:center; margin-top:0.5em;">Slow CI · flaky tests nobody trusts · expensive to maintain</p>
+            <p class="muted" style="font-size:0.6em; text-align:center; margin-top:0.5em;">This is probably your team right now — and it's not your fault</p>
             <aside class="notes">
-                This is the most common anti-pattern you'll see. Teams pile up E2E and manual tests because they "feel" safer, and under-invest in unit tests. The result: a slow CI pipeline, tests that flake randomly, and a test suite the team stops trusting. As a tech lead, recognizing this shape and correcting it is one of the highest-leverage things you can do.
+                This is the most common pattern I've seen. Teams pile up integration and E2E tests because they feel more real — you're testing something you can see. Unit tests feel almost too small. But the ice cream cone means slow CI, flaky tests, and a suite nobody trusts. The root cause isn't laziness — it's that nobody taught them what a real unit test is.
             </aside>
         </section>
 
         <!-- TECH LEAD TAKEAWAY -->
         <section>
-            <h2>The Tech Lead Question</h2>
+            <h2>The Questions to Ask Your Team</h2>
             <hr class="sep">
             <blockquote>
-                "Is our testing investment distributed well?"
+                "What does a unit test actually mean to us?"
             </blockquote>
-            <p style="font-size:0.75em;">Not just <em>"do we have tests?"</em> but:</p>
             <ul>
-                <li>Are we <strong>fast</strong> at the base? Can devs get feedback in seconds?</li>
-                <li>Are we <strong>selective</strong> at the top? Only critical paths in E2E?</li>
-                <li>Do developers <strong>trust</strong> the test suite?</li>
+                <li>Do your developers know the difference between a unit and an integration test?</li>
+                <li>If their definition is fuzzy, <strong>their TDD will be wrong too</strong></li>
+                <li>Can devs run the full suite locally in <strong>under 30 seconds?</strong></li>
+                <li>Does a green build mean <strong>good code</strong>, or just working plumbing?</li>
             </ul>
             <p style="font-size:0.6em; margin-top:0.8em;" class="dim">
-                The pyramid is the shape — your job is to keep it that way.
+                Before fixing the pyramid, fix the understanding.
             </p>
             <aside class="notes">
-                The shift from "senior engineer" to "tech lead" thinking is this: you stop asking "do we have tests?" and start asking "is our test investment making us faster or slower?" A healthy pyramid means fast feedback loops, confident deployments, and a team that trusts the green build. An inverted pyramid means slow CI, flaky tests, and developers who skip running tests locally because "they always break anyway."
+                The most important shift I made as a tech lead wasn't introducing TDD — it was getting alignment on what a unit test actually is. If your team conflates unit and integration tests, TDD becomes just "write a test that spins up the database before you write the feature." That's not TDD. It's just slower integration testing.
             </aside>
         </section>
 
@@ -534,64 +534,72 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
         <!-- TRANSITION -->
         <!-- ============================================ -->
         <section class="center-slide">
-            <p class="dim" style="font-size:0.7em;">The pyramid tells you <strong class="blue">where</strong> to test</p>
-            <h2 style="margin:0.2em 0;">Now let's talk about <span class="green">how</span></h2>
+            <p class="dim" style="font-size:0.7em;">The pyramid tells you <strong class="blue">where</strong> to invest</p>
+            <h2 style="margin:0.2em 0;">So why can't most teams <span class="green">get there?</span></h2>
             <aside class="notes">
-                So the pyramid gives us the WHERE — invest heavily at the unit level, be selective at the top. Now let's talk about HOW to actually write those tests effectively. Enter TDD.
+                The pyramid makes sense to everyone when they see it. But most teams still end up with the cone. Why? Because building a proper unit test base requires a different way of thinking about code. Let's talk about that.
             </aside>
         </section>
 
         <!-- ============================================ -->
-        <!-- PART 2: TDD -->
+        <!-- PART 2: THE MENTALITY SHIFT -->
         <!-- ============================================ -->
         <section>
             <section>
                 <span class="tag tag-green">Part 2</span>
-                <h2>Test-Driven Development</h2>
+                <h2>The Mentality Shift</h2>
                 <hr class="sep">
-                <p class="muted" style="font-size:0.7em;">A design practice disguised as a testing practice</p>
+                <p class="muted" style="font-size:0.7em;">From "we test what we built" to "we build so it can be tested"</p>
                 <aside class="notes">
-                    TDD is often misunderstood as "just writing tests first." It's actually a design discipline — it changes how you think about code before you write it.
+                    The real shift isn't about process — it's about design. The question isn't "do we write tests before or after?" It's "do we write code that CAN be unit tested?" That's a fundamentally different kind of code.
                 </aside>
             </section>
         </section>
 
-        <!-- THE CYCLE -->
+        <!-- UNIT VS INTEGRATION: ISOLATION -->
         <section>
-            <h2>The Cycle: <span class="red">Red</span> → <span class="green">Green</span> → <span class="blue">Refactor</span></h2>
+            <h2>What <span class="green">isolation</span> really means</h2>
             <hr class="sep">
-            <div class="cycle">
-                <div class="cycle-step" style="background:rgba(248,113,113,0.15); color:#f87171; border:2px solid #f87171;">
-                    1. RED<br><span style="font-size:0.7em; font-weight:400;">Write a failing test</span>
+            <div class="two-col">
+                <div>
+                    <p style="font-size:0.55em;" class="muted">Integration test — tells you the plumbing works</p>
+                    <pre><code class="language-php">public function test_user_is_created(): void
+{
+    $user = $this->userService
+        ->create('alice@example.com');
+
+    $this->assertDatabaseHas('users', [
+        'email' => 'alice@example.com'
+    ]);
+}</code></pre>
+                    <p style="font-size:0.5em; margin-top:0.4em;" class="dim">Needs a real DB · slow · tells you nothing about design</p>
                 </div>
-                <span class="cycle-arrow">→</span>
-                <div class="cycle-step" style="background:rgba(52,211,153,0.15); color:#34d399; border:2px solid #34d399;">
-                    2. GREEN<br><span style="font-size:0.7em; font-weight:400;">Make it pass (minimal)</span>
+                <div>
+                    <p style="font-size:0.55em;" class="muted">Unit test — tells you the logic is correct</p>
+                    <pre><code class="language-php">public function test_discount_is_applied(): void
+{
+    $price = calculatePrice(
+        base: 100,
+        discountPct: 20
+    );
+
+    $this->assertSame(80.0, $price);
+}</code></pre>
+                    <p style="font-size:0.5em; margin-top:0.4em;" class="dim">No DB · no HTTP · no filesystem · pure logic</p>
                 </div>
-                <span class="cycle-arrow">→</span>
-                <div class="cycle-step" style="background:rgba(96,165,250,0.15); color:#60a5fa; border:2px solid #60a5fa;">
-                    3. REFACTOR<br><span style="font-size:0.7em; font-weight:400;">Clean up the code</span>
-                </div>
-            </div>
-            <div style="text-align:center; margin-top:0.6em;">
-                <svg width="120" height="40" viewBox="0 0 120 40">
-                    <path d="M100,30 Q60,45 20,30" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrowhead2)"/>
-                    <defs><marker id="arrowhead2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker></defs>
-                </svg>
-                <p class="dim" style="font-size:0.55em;">repeat in small steps</p>
             </div>
             <aside class="notes">
-                The cycle is simple. Step 1: write a test that describes what you want — it fails because the code doesn't exist yet. Step 2: write the minimum code to make it pass. Don't over-engineer, just pass the test. Step 3: now that it's working, clean it up — remove duplication, improve naming, restructure. Then repeat. The key is small steps — each cycle should be minutes, not hours.
+                A unit test has zero external dependencies. No database, no network, no filesystem, no other services. If you need to mock a database to run your test, that's an integration test — and that's fine, but call it what it is. The rule of thumb: if your test can't run offline in a fresh PHP process with no container, it's not a unit test.
             </aside>
         </section>
 
         <!-- QUICK EXAMPLE -->
         <section>
-            <h2>A Quick Example</h2>
+            <h2>What unit-testable code <span class="green">looks like</span></h2>
             <hr class="sep">
             <div class="two-col">
                 <div>
-                    <p style="font-size:0.6em;" class="muted">① <span class="red">RED</span> — Write the test first</p>
+                    <p style="font-size:0.6em;" class="muted">① Write the test — define the interface</p>
                     <pre><code class="language-php">public function test_apply_discount(): void
 {
     $price = calculatePrice(
@@ -605,7 +613,7 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
                     </p>
                 </div>
                 <div>
-                    <p style="font-size:0.6em;" class="muted">② <span class="green">GREEN</span> — Simplest thing that works</p>
+                    <p style="font-size:0.6em;" class="muted">② Write the implementation — minimal, focused</p>
                     <pre><code class="language-php">function calculatePrice(float $base, float $discountPct): float
 {
     return $base * (1 - $discountPct / 100);
@@ -616,38 +624,63 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
                 </div>
             </div>
             <p style="font-size:0.6em; margin-top:0.5em;" class="muted">
-                Notice: the test defined the <strong style="color:var(--text-primary);">interface</strong> before <code>calculatePrice</code> existed.
+                Notice what this function is <strong style="color:var(--text-primary);">not</strong> doing: no DB call, no HTTP, no global state. Clear input → clear output. That's it.
             </p>
             <aside class="notes">
-                Simple example. We write the test first — we decide what the function should be called, what arguments it takes, and what it should return. The function doesn't exist yet, so the test fails. Then we write the simplest code to make it pass. The key observation: by writing the test first, we designed the interface before we wrote the code. That's the real power of TDD.
+                This function is trivially unit-testable because it does exactly one thing. It takes two numbers and returns one number. No setup, no mocking, no containers. If your functions looked like this, your test suite would be fast, reliable, and trustworthy. The question is: how do you get your codebase there?
             </aside>
         </section>
 
-        <!-- TDD AS DESIGN -->
+        <!-- THE QUESTION THAT CHANGED EVERYTHING -->
         <section>
-            <h2>TDD is a <span class="green">Design</span> Tool</h2>
+            <h2>The question that <span class="green">changed everything</span></h2>
+            <hr class="sep">
+            <blockquote>
+                "How would I unit test this?"
+            </blockquote>
+            <p style="font-size:0.7em;">We didn't always know how to write good code. But whenever we got stuck on a design decision, we asked this one question — and it guided us every time.</p>
+            <ul>
+                <li>If the answer was <strong>"I'd need to spin up a DB"</strong> → the class was doing too much</li>
+                <li>If the answer was <strong>"I'd need to mock 5 things"</strong> → the dependencies were wrong</li>
+                <li>If the answer was <strong>"I'd need to change global state"</strong> → that's a design smell</li>
+            </ul>
+            <p style="font-size:0.6em; margin-top:0.6em;" class="muted">
+                The <strong style="color:var(--text-primary);">pain of testing</strong> is the signal. Don't suppress it — follow it.
+            </p>
+            <aside class="notes">
+                This is the most personal thing I can share with you. We were building a system and we weren't sure how to structure something. One of the engineers said "how would we even unit test this?" and we realised we couldn't. That was the signal. We refactored until the answer was simple. That discipline — following the pain of testing back to a design problem — is something I still use every day.
+            </aside>
+        </section>
+
+        <!-- SINGLE RESPONSIBILITY: THE NORTH STAR -->
+        <section>
+            <h2>Single Responsibility: <span class="green">the north star</span></h2>
             <hr class="sep">
             <div class="two-col">
                 <div>
-                    <p style="font-size:0.7em;">Writing tests first forces you to:</p>
+                    <p style="font-size:0.7em;">A function or class that does <strong>one thing</strong>:</p>
                     <ul>
-                        <li>Think about <strong>interfaces</strong> before implementation</li>
-                        <li>Keep code <strong>modular</strong> — hard-to-test code is often hard-to-use code</li>
-                        <li>Produce <strong>loosely coupled</strong> components</li>
+                        <li>Is trivially unit-testable</li>
+                        <li>Has clear inputs and outputs</li>
+                        <li>Can be changed without fear</li>
+                        <li>Can be understood in isolation</li>
                     </ul>
+                    <p style="font-size:0.65em; margin-top:0.6em;" class="muted">
+                        SRP isn't just a clean code principle — it's the <strong style="color:var(--text-primary);">prerequisite</strong> for unit testability.
+                    </p>
                 </div>
                 <div class="card" style="border-left: 3px solid var(--accent-green);">
-                    <h3 class="dim" style="font-size:0.6em;">THE INSIGHT</h3>
+                    <h3 class="dim" style="font-size:0.6em;">THE RULE</h3>
                     <p style="font-size:0.7em; color: var(--text-primary);">
-                        If your code is <strong>hard to test</strong>,<br>it's probably <strong>hard to maintain</strong>.
+                        If your test setup is <strong>painful</strong>, your code is doing <strong>too much</strong>.
                     </p>
-                    <p style="font-size:0.6em; margin-top:0.5em;">
-                        TDD gives you that signal <em>before</em> you've built too much.
+                    <p style="font-size:0.6em; margin-top:0.5em;" class="muted">
+                        Stop trying to write the test. Start asking what needs to be split.
                     </p>
                 </div>
             </div>
             <aside class="notes">
-                This is the most important slide about TDD. Most people think TDD is about catching bugs. It's really about design feedback. When you write the test first, you're the first "user" of your own code. If it's awkward to set up, if it needs too many dependencies, if the interface is confusing — you find out immediately. Hard-to-test code is a design smell, and TDD surfaces that smell early, before you've built layers on top of it.
+                Single Responsibility is often taught as a style preference. It's not. It's a forcing function. When you commit to writing unit-testable code, SRP stops being optional — it becomes mandatory, because code that does too many things cannot be tested in isolation. And code that can't be tested in isolation will rot.
             </aside>
         </section>
 
@@ -655,22 +688,26 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
         <section>
             <h2>Why This Matters for <span class="blue">Tech Leads</span></h2>
             <hr class="sep">
-            <div class="three-col">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.8em;">
                 <div class="card" style="border-top: 3px solid var(--accent-green);">
                     <h3 class="green">Confidence</h3>
-                    <p>Tests as a safety net: your team can change code without fear. New contributors can modify existing code on day one.</p>
+                    <p>Your team can change code without fear. New engineers can modify existing code on day one.</p>
                 </div>
                 <div class="card" style="border-top: 3px solid var(--accent-amber);">
                     <h3 class="amber">Sustainability</h3>
-                    <p>Modular, well-tested code stays maintainable as the team and codebase grow. Less "don't touch that" code.</p>
+                    <p>Modular, well-tested code stays maintainable as the codebase grows. Less "don't touch that" code.</p>
                 </div>
                 <div class="card" style="border-top: 3px solid var(--accent-blue);">
                     <h3 class="blue">Velocity</h3>
-                    <p>Counterintuitively, TDD often speeds teams up. Less debugging, fewer regressions, faster onboarding.</p>
+                    <p>Less debugging, fewer regressions, faster onboarding. The upfront cost pays back many times over.</p>
+                </div>
+                <div class="card" style="border-top: 3px solid var(--accent-purple);">
+                    <h3 class="purple">AI-Readability</h3>
+                    <p>Unit-testable code — clear inputs, single responsibility, no hidden state — is exactly what AI agents parse and reason about best. This is how we write code for the future.</p>
                 </div>
             </div>
             <aside class="notes">
-                As a tech lead, you're responsible for a codebase that multiple people touch. TDD gives you three things. Confidence: developers can change code without fear because tests have their back. Sustainability: the codebase stays modular and maintainable as it grows. Velocity: yes, writing tests takes time upfront, but you save it many times over in reduced debugging, fewer regressions, and faster onboarding of new team members.
+                I want to highlight the fourth one because it's where we're heading. AI coding assistants are already part of our workflow. The code they work best with — and the code they generate that's easiest to review and trust — has clear boundaries, single responsibility, no hidden dependencies. That's not a coincidence. It's the same thing unit testability demands. Writing unit-testable code today means writing AI-compatible code tomorrow.
             </aside>
         </section>
 
@@ -737,27 +774,27 @@ permalink: /presentations/tdd-for-tech-leads/tdd-for-tech-leads.html
         <section class="center-slide">
             <h2>Putting It Together</h2>
             <hr class="sep" style="margin: 0.5em auto;">
-            <div style="display:flex; justify-content:center; gap:2em; margin:1em 0;">
+            <div style="display:flex; justify-content:center; gap:1.5em; margin:1em 0; flex-wrap:wrap;">
                 <div style="text-align:center;">
-                    <p class="blue" style="font-size:1.4em; font-weight:700; font-family:'JetBrains Mono';">Pyramid</p>
-                    <p class="muted" style="font-size:0.65em;">Where to invest</p>
+                    <p class="blue" style="font-size:1.2em; font-weight:700; font-family:'JetBrains Mono';">Pyramid</p>
+                    <p class="muted" style="font-size:0.6em;">Where to invest</p>
                 </div>
                 <div style="font-size:2em; color:var(--text-dim); line-height:1.8;">+</div>
                 <div style="text-align:center;">
-                    <p class="green" style="font-size:1.4em; font-weight:700; font-family:'JetBrains Mono';">TDD</p>
-                    <p class="muted" style="font-size:0.65em;">How to write them</p>
+                    <p class="green" style="font-size:1.2em; font-weight:700; font-family:'JetBrains Mono';">Unit-testable code</p>
+                    <p class="muted" style="font-size:0.6em;">SRP · isolation · clear interfaces</p>
                 </div>
                 <div style="font-size:2em; color:var(--text-dim); line-height:1.8;">=</div>
                 <div style="text-align:center;">
-                    <p class="amber" style="font-size:1.4em; font-weight:700; font-family:'JetBrains Mono';">Confidence</p>
-                    <p class="muted" style="font-size:0.65em;">Ship without fear</p>
+                    <p class="amber" style="font-size:1.2em; font-weight:700; font-family:'JetBrains Mono';">Clean, maintainable,<br>AI-ready code</p>
+                    <p class="muted" style="font-size:0.6em;">Ship without fear. Grow without rot.</p>
                 </div>
             </div>
             <blockquote style="text-align:center; border-left:none; max-width:80%; margin:0.8em auto;">
-                A tech lead's job is to build a team that can <strong style="color:var(--text-primary);">change code with confidence</strong>.
+                Ask not "do we have tests?" Ask "can we <strong style="color:var(--text-primary);">unit test this</strong> — and if not, why not?"
             </blockquote>
             <aside class="notes">
-                The test pyramid gives you the framework for where to invest your testing effort. TDD gives you a practice for how to write effective tests that also improve your design. Together, they let your team ship with confidence — which is ultimately what a tech lead is responsible for. Questions?
+                That one question — "can I unit test this?" — is the compass. It leads to SRP, to loose coupling, to clean interfaces. And clean interfaces are what lets your team move fast, what lets new engineers contribute on day one, and what lets AI tools work with your codebase effectively. This is the direction we're moving. Start with the question.
             </aside>
         </section>
 
