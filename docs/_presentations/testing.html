@@ -1,0 +1,799 @@
+---
+layout: null
+title: The Test Pyramid & TDD
+date: 2026-03-13
+category: Tech Lead School
+description: A Reveal.js presentation covering the test pyramid as a cost model for testing investment and TDD as a design practice.
+permalink: /presentations/testing/testing.html
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Test Pyramid & TDD — Tech Lead School #3</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/theme/white.css" id="theme">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #f9f3e5;
+            --bg-card: #ffffff;
+            --accent-green: #059669;
+            --accent-amber: #d97706;
+            --accent-red: #dc2626;
+            --accent-blue: #2563eb;
+            --accent-purple: #7c3aed;
+            --text-primary: #2c3e50;
+            --text-muted: #4a5568;
+            --text-dim: #718096;
+        }
+
+        .reveal-viewport {
+            background: var(--bg-deep);
+        }
+
+        .reveal {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            font-size: 32px;
+            color: var(--text-primary);
+        }
+
+        .reveal h1, .reveal h2, .reveal h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-transform: none;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        /* Logos */
+        .reveal .slides::before {
+            content: '';
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 140px;
+            height: 40px;
+            background-image: url('/presentations/day-in-life/logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 1000;
+            opacity: 0.8;
+        }
+
+        .reveal .slides::after {
+            content: '';
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 40px;
+            background-image: url('/presentations/day-in-life/upskill-tech.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 1000;
+            opacity: 0.8;
+        }
+
+        .reveal h1 { font-size: 2.4em; line-height: 1.1; }
+        .reveal h2 { font-size: 1.6em; line-height: 1.2; margin-bottom: 0.6em; }
+        .reveal h3 { font-size: 1.2em; }
+
+        .reveal code, .reveal pre code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .reveal pre {
+            box-shadow: none;
+            font-size: 0.55em;
+            width: 100%;
+            min-height: 0;
+            height: fit-content;
+        }
+
+        .reveal pre code {
+            padding: 0.8em 1em;
+            border-radius: 12px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            height: auto;
+            max-height: none;
+        }
+
+        .reveal section {
+            text-align: left;
+        }
+
+        .reveal .center-slide {
+            text-align: center;
+        }
+
+        /* Accent text */
+        .green { color: var(--accent-green); }
+        .amber { color: var(--accent-amber); }
+        .red { color: var(--accent-red); }
+        .blue { color: var(--accent-blue); }
+        .purple { color: var(--accent-purple); }
+        .muted { color: var(--text-muted); }
+        .dim { color: var(--text-dim); }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Tag / pill */
+        .tag {
+            display: inline-block;
+            padding: 0.15em 0.6em;
+            border-radius: 6px;
+            font-size: 0.55em;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            vertical-align: middle;
+            margin-bottom: 0.4em;
+        }
+        .tag-green { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+        .tag-amber { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+        .tag-red   { background: rgba(248, 113, 113, 0.15); color: var(--accent-red); }
+        .tag-blue  { background: rgba(96, 165, 250, 0.15); color: var(--accent-blue); }
+        .tag-purple { background: rgba(167, 139, 250, 0.15); color: var(--accent-purple); }
+
+        /* Pyramid SVG styles */
+        .pyramid-container {
+            display: flex;
+            justify-content: center;
+            margin: 0.8em 0;
+        }
+
+        /* Grid layouts */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5em;
+            align-items: start;
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1em;
+            align-items: start;
+        }
+
+        /* Card style */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1em;
+        }
+
+        .card h3 {
+            margin: 0 0 0.3em 0;
+            font-size: 0.9em;
+        }
+
+        .card p, .card ul {
+            font-size: 0.65em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .card ul {
+            padding-left: 1.2em;
+            list-style: none;
+        }
+
+        .card ul li::before {
+            content: "→ ";
+            color: var(--text-dim);
+        }
+
+        /* Cycle diagram */
+        .cycle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4em;
+            margin: 1em 0;
+        }
+
+        .cycle-step {
+            padding: 0.5em 1em;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .cycle-arrow {
+            font-size: 1.2em;
+            color: var(--text-dim);
+        }
+
+        /* Blockquote */
+        .reveal blockquote {
+            background: rgba(96, 165, 250, 0.06);
+            border-left: 4px solid var(--accent-blue);
+            padding: 0.6em 1em;
+            margin: 0.8em 0;
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 0.85em;
+            width: auto;
+        }
+
+        /* Lists */
+        .reveal ul, .reveal ol {
+            margin-left: 0;
+        }
+
+        .reveal li {
+            margin-bottom: 0.4em;
+            font-size: 0.8em;
+            color: var(--text-muted);
+        }
+
+        .reveal li strong {
+            color: var(--text-primary);
+        }
+
+        /* Separator */
+        .sep {
+            width: 60px;
+            height: 3px;
+            background: var(--accent-green);
+            border: none;
+            margin: 0.5em 0 0.8em 0;
+            border-radius: 2px;
+        }
+
+        /* Big number stat */
+        .stat {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5em;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* Progress dots */
+        .progress-dots {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 0.6em;
+        }
+        .progress-dots .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--text-dim);
+        }
+        .progress-dots .dot.active {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+        }
+
+        /* Slide number */
+        .reveal .slide-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        /* Speaker notes styling */
+        .reveal .speaker-controls-notes {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        /* Anti-pattern comparison */
+        .compare-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2em;
+            align-items: end;
+            justify-items: center;
+            margin-top: 0.5em;
+        }
+
+        /* Subtle glow on key elements */
+        .glow-green { text-shadow: 0 0 20px rgba(52, 211, 153, 0.3); }
+        .glow-red   { text-shadow: 0 0 20px rgba(248, 113, 113, 0.3); }
+
+        /* When / When not table */
+        .when-table {
+            width: 100%;
+            font-size: 0.6em;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .when-table th {
+            padding: 0.5em 0.8em;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid #334155;
+        }
+        .when-table td {
+            padding: 0.5em 0.8em;
+            color: var(--text-muted);
+            border-bottom: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- ============================================ -->
+        <!-- TITLE SLIDE -->
+        <!-- ============================================ -->
+        <section class="center-slide">
+            <div>
+                <span class="tag tag-green">Tech Lead School · Session 3</span>
+            </div>
+            <h1 style="margin-top:0.3em;">The Test Pyramid<br>& <span class="green">Test-Driven Development</span></h1>
+            <hr class="sep" style="margin:0.6em auto;">
+            <p class="muted" style="font-size:0.6em;">Building confidence through testing strategy</p>
+            <aside class="notes">
+                Welcome to session 3. Today we'll cover two related topics: the test pyramid as a framework for WHERE to invest in testing, and TDD as a practice for HOW to write tests. Both are essential tools in a tech lead's toolkit.
+            </aside>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- PART 1: TEST PYRAMID -->
+        <!-- ============================================ -->
+        <section>
+            <section>
+                <span class="tag tag-blue">Part 1</span>
+                <h2>The Test Pyramid</h2>
+                <hr class="sep">
+                <p class="muted" style="font-size:0.7em;">A cost model for testing investment</p>
+                <aside class="notes">
+                    The test pyramid isn't just a diagram — it's a decision-making tool. As a tech lead, you need to think about how your team allocates testing effort.
+                </aside>
+            </section>
+        </section>
+
+        <!-- THE THREE LAYERS -->
+        <section>
+            <h2>Three Layers</h2>
+            <hr class="sep">
+            <div class="pyramid-container">
+                <svg width="520" height="320" viewBox="0 0 520 320">
+                    <!-- E2E layer -->
+                    <polygon points="260,20 350,110 170,110" fill="rgba(248,113,113,0.15)" stroke="#f87171" stroke-width="2"/>
+                    <text x="260" y="78" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="14" font-weight="700">E2E / UI</text>
+
+                    <!-- Integration layer -->
+                    <polygon points="170,120 350,120 410,210 110,210" fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="2"/>
+                    <text x="260" y="175" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-size="14" font-weight="700">Integration</text>
+
+                    <!-- Unit layer -->
+                    <polygon points="110,220 410,220 480,310 40,310" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="2"/>
+                    <text x="260" y="275" text-anchor="middle" fill="#34d399" font-family="JetBrains Mono" font-size="14" font-weight="700">Unit Tests</text>
+
+                    <!-- Labels on right side -->
+                    <text x="440" y="78" fill="#94a3b8" font-family="DM Sans" font-size="12">Slow, expensive</text>
+                    <text x="440" y="95" fill="#94a3b8" font-family="DM Sans" font-size="12">but high confidence</text>
+
+                    <text x="440" y="275" fill="#94a3b8" font-family="DM Sans" font-size="12">Fast, cheap</text>
+                    <text x="440" y="292" fill="#94a3b8" font-family="DM Sans" font-size="12">and reliable</text>
+
+                    <!-- Arrow on left -->
+                    <line x1="25" y1="290" x2="25" y2="40" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker></defs>
+                    <text x="15" y="170" fill="#64748b" font-family="DM Sans" font-size="11" transform="rotate(-90, 15, 170)">Cost per test</text>
+                </svg>
+            </div>
+            <aside class="notes">
+                Three layers, each with different tradeoffs. Unit tests at the base: fast, cheap, isolated — test a single function or class. Integration in the middle: test how components work together, like your service talking to a database. E2E at the top: test the whole system end-to-end, like a real user flow. The pyramid shape tells you WHERE to invest most.
+            </aside>
+        </section>
+
+        <!-- CONCRETE EXAMPLES -->
+        <section>
+            <h2>What lives where?</h2>
+            <hr class="sep">
+            <div class="three-col">
+                <div class="card" style="border-color: #34d399;">
+                    <h3 class="green">Unit</h3>
+                    <ul>
+                        <li>Calculate discount price</li>
+                        <li>Validate email format</li>
+                        <li>Parse API response</li>
+                        <li>Business logic rules</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-color: #fbbf24;">
+                    <h3 class="amber">Integration</h3>
+                    <ul>
+                        <li>API endpoint returns correct data</li>
+                        <li>DB query + service layer</li>
+                        <li>Auth middleware chain</li>
+                        <li>External API contracts</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-color: #f87171;">
+                    <h3 class="red">E2E</h3>
+                    <ul>
+                        <li>User signup → email → login</li>
+                        <li>Purchase flow end-to-end</li>
+                        <li>Critical happy paths</li>
+                        <li>Cross-service workflows</li>
+                    </ul>
+                </div>
+            </div>
+            <aside class="notes">
+                Let's make this concrete. Unit tests cover isolated logic — a function that calculates a price, validates an input. Integration tests verify components working together — does your endpoint actually talk to the database correctly? E2E tests cover real user journeys — can someone actually sign up and use the product? Each layer answers a different question.
+            </aside>
+        </section>
+
+        <!-- IT'S A COST MODEL -->
+        <section>
+            <h2>It's a <span class="green">cost model</span></h2>
+            <hr class="sep">
+            <div class="two-col">
+                <div>
+                    <p style="font-size:0.75em;">Every test you write has a <strong>maintenance cost</strong>:</p>
+                    <ul>
+                        <li><strong class="green">Unit:</strong> milliseconds to run, easy to fix</li>
+                        <li><strong class="amber">Integration:</strong> seconds to run, moderate setup</li>
+                        <li><strong class="red">E2E:</strong> minutes to run, brittle, hard to debug</li>
+                    </ul>
+                    <p style="font-size:0.65em; margin-top:0.8em;" class="muted">
+                        The pyramid tells you: <strong style="color:var(--text-primary);">invest most where the cost is lowest</strong>
+                    </p>
+                </div>
+                <div class="card" style="text-align:center;">
+                    <p style="font-size:0.6em; margin-bottom:0.5em;" class="muted">Typical execution time</p>
+                    <div style="margin:0.3em 0;">
+                        <span class="stat green">~5ms</span>
+                        <p style="font-size:0.5em;" class="muted">per unit test</p>
+                    </div>
+                    <div style="margin:0.3em 0;">
+                        <span class="stat amber" style="font-size:1.8em;">~500ms</span>
+                        <p style="font-size:0.5em;" class="muted">per integration test</p>
+                    </div>
+                    <div style="margin:0.3em 0;">
+                        <span class="stat red" style="font-size:1.4em;">~30s+</span>
+                        <p style="font-size:0.5em;" class="muted">per E2E test</p>
+                    </div>
+                </div>
+            </div>
+            <aside class="notes">
+                The pyramid isn't about dogma — it's about economics. Unit tests cost almost nothing to run and are easy to maintain. E2E tests are expensive: slow to run, brittle, hard to debug when they fail. So you want the bulk of your coverage at the unit level. This doesn't mean E2E isn't valuable — it absolutely is for critical paths. But it shouldn't be your primary testing strategy.
+            </aside>
+        </section>
+
+        <!-- THE ANTI-PATTERN -->
+        <section>
+            <h2>The Anti-Pattern: <span class="red">Ice Cream Cone</span></h2>
+            <hr class="sep">
+            <div class="compare-container">
+                <div style="text-align:center;">
+                    <svg width="200" height="260" viewBox="0 0 200 260">
+                        <polygon points="100,20 160,100 40,100" fill="rgba(248,113,113,0.15)" stroke="#f87171" stroke-width="2"/>
+                        <text x="100" y="72" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="11" font-weight="700">E2E</text>
+                        <polygon points="40,110 160,110 180,190 20,190" fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="2"/>
+                        <text x="100" y="158" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-size="11" font-weight="700">Integration</text>
+                        <polygon points="20,200 180,200 200,250 0,250" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="2"/>
+                        <text x="100" y="232" text-anchor="middle" fill="#34d399" font-family="JetBrains Mono" font-size="11" font-weight="700">Unit</text>
+                    </svg>
+                    <p class="green" style="font-size:0.6em; font-weight:700;">✓ Pyramid (healthy)</p>
+                </div>
+                <div style="text-align:center;">
+                    <svg width="200" height="260" viewBox="0 0 200 260">
+                        <!-- Ice cream scoop -->
+                        <ellipse cx="100" cy="55" rx="85" ry="50" fill="rgba(248,113,113,0.2)" stroke="#f87171" stroke-width="2"/>
+                        <text x="100" y="45" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="11" font-weight="700">E2E</text>
+                        <text x="100" y="62" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono" font-size="9">(manual + flaky)</text>
+                        <!-- Cone -->
+                        <polygon points="30,95 170,95 115,195 85,195" fill="rgba(251,191,36,0.15)" stroke="#fbbf24" stroke-width="2"/>
+                        <text x="100" y="145" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-size="11" font-weight="700">Integration</text>
+                        <polygon points="85,205 115,205 105,245 95,245" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="2"/>
+                        <text x="100" y="230" text-anchor="middle" fill="#34d399" font-family="JetBrains Mono" font-size="9" font-weight="700">Unit</text>
+                    </svg>
+                    <p class="red" style="font-size:0.6em; font-weight:700;">✗ Ice Cream Cone</p>
+                </div>
+            </div>
+            <p class="muted" style="font-size:0.6em; text-align:center; margin-top:0.5em;">Slow CI · flaky tests nobody trusts · expensive to maintain</p>
+            <aside class="notes">
+                This is the most common anti-pattern you'll see. Teams pile up E2E and manual tests because they "feel" safer, and under-invest in unit tests. The result: a slow CI pipeline, tests that flake randomly, and a test suite the team stops trusting. As a tech lead, recognizing this shape and correcting it is one of the highest-leverage things you can do.
+            </aside>
+        </section>
+
+        <!-- TECH LEAD TAKEAWAY -->
+        <section>
+            <h2>The Tech Lead Question</h2>
+            <hr class="sep">
+            <blockquote>
+                "Is our testing investment distributed well?"
+            </blockquote>
+            <p style="font-size:0.75em;">Not just <em>"do we have tests?"</em> but:</p>
+            <ul>
+                <li>Are we <strong>fast</strong> at the base? Can devs get feedback in seconds?</li>
+                <li>Are we <strong>selective</strong> at the top? Only critical paths in E2E?</li>
+                <li>Do developers <strong>trust</strong> the test suite?</li>
+            </ul>
+            <p style="font-size:0.6em; margin-top:0.8em;" class="dim">
+                The pyramid is the shape — your job is to keep it that way.
+            </p>
+            <aside class="notes">
+                The shift from "senior engineer" to "tech lead" thinking is this: you stop asking "do we have tests?" and start asking "is our test investment making us faster or slower?" A healthy pyramid means fast feedback loops, confident deployments, and a team that trusts the green build. An inverted pyramid means slow CI, flaky tests, and developers who skip running tests locally because "they always break anyway."
+            </aside>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- TRANSITION -->
+        <!-- ============================================ -->
+        <section class="center-slide">
+            <p class="dim" style="font-size:0.7em;">The pyramid tells you <strong class="blue">where</strong> to test</p>
+            <h2 style="margin:0.2em 0;">Now let's talk about <span class="green">how</span></h2>
+            <aside class="notes">
+                So the pyramid gives us the WHERE — invest heavily at the unit level, be selective at the top. Now let's talk about HOW to actually write those tests effectively. Enter TDD.
+            </aside>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- PART 2: TDD -->
+        <!-- ============================================ -->
+        <section>
+            <section>
+                <span class="tag tag-green">Part 2</span>
+                <h2>Test-Driven Development</h2>
+                <hr class="sep">
+                <p class="muted" style="font-size:0.7em;">A design practice disguised as a testing practice</p>
+                <aside class="notes">
+                    TDD is often misunderstood as "just writing tests first." It's actually a design discipline — it changes how you think about code before you write it.
+                </aside>
+            </section>
+        </section>
+
+        <!-- THE CYCLE -->
+        <section>
+            <h2>The Cycle: <span class="red">Red</span> → <span class="green">Green</span> → <span class="blue">Refactor</span></h2>
+            <hr class="sep">
+            <div class="cycle">
+                <div class="cycle-step" style="background:rgba(248,113,113,0.15); color:#f87171; border:2px solid #f87171;">
+                    1. RED<br><span style="font-size:0.7em; font-weight:400;">Write a failing test</span>
+                </div>
+                <span class="cycle-arrow">→</span>
+                <div class="cycle-step" style="background:rgba(52,211,153,0.15); color:#34d399; border:2px solid #34d399;">
+                    2. GREEN<br><span style="font-size:0.7em; font-weight:400;">Make it pass (minimal)</span>
+                </div>
+                <span class="cycle-arrow">→</span>
+                <div class="cycle-step" style="background:rgba(96,165,250,0.15); color:#60a5fa; border:2px solid #60a5fa;">
+                    3. REFACTOR<br><span style="font-size:0.7em; font-weight:400;">Clean up the code</span>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:0.6em;">
+                <svg width="120" height="40" viewBox="0 0 120 40">
+                    <path d="M100,30 Q60,45 20,30" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrowhead2)"/>
+                    <defs><marker id="arrowhead2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker></defs>
+                </svg>
+                <p class="dim" style="font-size:0.55em;">repeat in small steps</p>
+            </div>
+            <aside class="notes">
+                The cycle is simple. Step 1: write a test that describes what you want — it fails because the code doesn't exist yet. Step 2: write the minimum code to make it pass. Don't over-engineer, just pass the test. Step 3: now that it's working, clean it up — remove duplication, improve naming, restructure. Then repeat. The key is small steps — each cycle should be minutes, not hours.
+            </aside>
+        </section>
+
+        <!-- QUICK EXAMPLE -->
+        <section>
+            <h2>A Quick Example</h2>
+            <hr class="sep">
+            <div class="two-col">
+                <div>
+                    <p style="font-size:0.6em;" class="muted">① <span class="red">RED</span> — Write the test first</p>
+                    <pre><code class="language-php">public function test_apply_discount(): void
+{
+    $price = calculatePrice(
+        base: 100,
+        discountPct: 20
+    );
+    $this->assertSame(80.0, $price);
+}</code></pre>
+                    <p style="font-size:0.55em; margin-top:0.5em;" class="dim">
+                        calculatePrice doesn't exist yet → test fails ✗
+                    </p>
+                </div>
+                <div>
+                    <p style="font-size:0.6em;" class="muted">② <span class="green">GREEN</span> — Simplest thing that works</p>
+                    <pre><code class="language-php">function calculatePrice(float $base, float $discountPct): float
+{
+    return $base * (1 - $discountPct / 100);
+}</code></pre>
+                    <p style="font-size:0.55em; margin-top:0.5em;" class="dim">
+                        Test passes ✓ → now refactor if needed
+                    </p>
+                </div>
+            </div>
+            <p style="font-size:0.6em; margin-top:0.5em;" class="muted">
+                Notice: the test defined the <strong style="color:var(--text-primary);">interface</strong> before <code>calculatePrice</code> existed.
+            </p>
+            <aside class="notes">
+                Simple example. We write the test first — we decide what the function should be called, what arguments it takes, and what it should return. The function doesn't exist yet, so the test fails. Then we write the simplest code to make it pass. The key observation: by writing the test first, we designed the interface before we wrote the code. That's the real power of TDD.
+            </aside>
+        </section>
+
+        <!-- TDD AS DESIGN -->
+        <section>
+            <h2>TDD is a <span class="green">Design</span> Tool</h2>
+            <hr class="sep">
+            <div class="two-col">
+                <div>
+                    <p style="font-size:0.7em;">Writing tests first forces you to:</p>
+                    <ul>
+                        <li>Think about <strong>interfaces</strong> before implementation</li>
+                        <li>Keep code <strong>modular</strong> — hard-to-test code is often hard-to-use code</li>
+                        <li>Produce <strong>loosely coupled</strong> components</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-left: 3px solid var(--accent-green);">
+                    <h3 class="dim" style="font-size:0.6em;">THE INSIGHT</h3>
+                    <p style="font-size:0.7em; color: var(--text-primary);">
+                        If your code is <strong>hard to test</strong>,<br>it's probably <strong>hard to maintain</strong>.
+                    </p>
+                    <p style="font-size:0.6em; margin-top:0.5em;">
+                        TDD gives you that signal <em>before</em> you've built too much.
+                    </p>
+                </div>
+            </div>
+            <aside class="notes">
+                This is the most important slide about TDD. Most people think TDD is about catching bugs. It's really about design feedback. When you write the test first, you're the first "user" of your own code. If it's awkward to set up, if it needs too many dependencies, if the interface is confusing — you find out immediately. Hard-to-test code is a design smell, and TDD surfaces that smell early, before you've built layers on top of it.
+            </aside>
+        </section>
+
+        <!-- WHY TECH LEADS SHOULD CARE -->
+        <section>
+            <h2>Why This Matters for <span class="blue">Tech Leads</span></h2>
+            <hr class="sep">
+            <div class="three-col">
+                <div class="card" style="border-top: 3px solid var(--accent-green);">
+                    <h3 class="green">Confidence</h3>
+                    <p>Tests as a safety net: your team can change code without fear. New contributors can modify existing code on day one.</p>
+                </div>
+                <div class="card" style="border-top: 3px solid var(--accent-amber);">
+                    <h3 class="amber">Sustainability</h3>
+                    <p>Modular, well-tested code stays maintainable as the team and codebase grow. Less "don't touch that" code.</p>
+                </div>
+                <div class="card" style="border-top: 3px solid var(--accent-blue);">
+                    <h3 class="blue">Velocity</h3>
+                    <p>Counterintuitively, TDD often speeds teams up. Less debugging, fewer regressions, faster onboarding.</p>
+                </div>
+            </div>
+            <aside class="notes">
+                As a tech lead, you're responsible for a codebase that multiple people touch. TDD gives you three things. Confidence: developers can change code without fear because tests have their back. Sustainability: the codebase stays modular and maintainable as it grows. Velocity: yes, writing tests takes time upfront, but you save it many times over in reduced debugging, fewer regressions, and faster onboarding of new team members.
+            </aside>
+        </section>
+
+        <!-- WHEN TDD WORKS, WHEN IT DOESN'T -->
+        <section>
+            <h2>Being Pragmatic</h2>
+            <hr class="sep">
+            <div class="two-col">
+                <div class="card" style="border-top: 3px solid var(--accent-green);">
+                    <h3 class="green" style="font-size:0.8em;">TDD shines when...</h3>
+                    <ul>
+                        <li>Business logic & domain rules</li>
+                        <li>Clear inputs → expected outputs</li>
+                        <li>APIs and service interfaces</li>
+                        <li>Bug fixes <span class="dim">(write test that reproduces, then fix)</span></li>
+                        <li>Refactoring existing code</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-top: 3px solid var(--accent-red);">
+                    <h3 class="red" style="font-size:0.8em;">TDD struggles when...</h3>
+                    <ul>
+                        <li>Exploratory / prototyping work</li>
+                        <li>UI layout and visual design</li>
+                        <li>You don't yet know what to build</li>
+                        <li>Heavily integrated external systems</li>
+                        <li>One-off scripts & spikes</li>
+                    </ul>
+                </div>
+            </div>
+            <p style="font-size:0.6em; margin-top:0.6em;" class="muted">
+                A good tech lead promotes TDD as a <strong style="color:var(--text-primary);">default mindset</strong>, not a rigid mandate.
+            </p>
+            <aside class="notes">
+                Be honest with your team: TDD isn't always practical. It's great for business logic, well-defined interfaces, bug fixes (write a test that reproduces the bug, then fix it). It's harder when you're exploring, prototyping, or doing UI work where the output is visual. The mature approach: TDD is the default for logic and interfaces, but use your judgment. A tech lead who mandates 100% TDD everywhere will create friction; one who never promotes it misses its benefits.
+            </aside>
+        </section>
+
+        <!-- COMMON RESISTANCE -->
+        <section>
+            <h2>Addressing the Pushback</h2>
+            <hr class="sep">
+            <div style="font-size:0.75em;">
+                <div style="margin-bottom:0.8em;">
+                    <p><span class="red">❝</span> <em>"It slows me down"</em></p>
+                    <p class="muted" style="font-size:0.8em; margin-left:1.5em;">It slows you down <strong style="color:var(--text-primary);">now</strong>. It speeds up the team <strong style="color:var(--text-primary);">next month</strong>. Tech leads think in weeks, not hours.</p>
+                </div>
+                <div style="margin-bottom:0.8em;">
+                    <p><span class="red">❝</span> <em>"I'll write the tests after"</em></p>
+                    <p class="muted" style="font-size:0.8em; margin-left:1.5em;">After-the-fact tests verify implementation, not behavior. You also lose the design benefit.</p>
+                </div>
+                <div>
+                    <p><span class="red">❝</span> <em>"Our code is too coupled for TDD"</em></p>
+                    <p class="muted" style="font-size:0.8em; margin-left:1.5em;">That's exactly why you need it. TDD makes coupling <em>visible</em> and painful — which motivates decoupling.</p>
+                </div>
+            </div>
+            <aside class="notes">
+                You'll hear these objections from your team. "It slows me down" — yes, individually and in the short term. But as a tech lead you think about team velocity over time, not individual speed today. "I'll write tests after" — tests written after the fact tend to test implementation details rather than behavior, and you've lost the design feedback. "Our code is too coupled" — that's the strongest argument FOR TDD, not against it. The pain of testing coupled code is the signal that drives decoupling.
+            </aside>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- CLOSING -->
+        <!-- ============================================ -->
+        <section class="center-slide">
+            <h2>Putting It Together</h2>
+            <hr class="sep" style="margin: 0.5em auto;">
+            <div style="display:flex; justify-content:center; gap:2em; margin:1em 0;">
+                <div style="text-align:center;">
+                    <p class="blue" style="font-size:1.4em; font-weight:700; font-family:'JetBrains Mono';">Pyramid</p>
+                    <p class="muted" style="font-size:0.65em;">Where to invest</p>
+                </div>
+                <div style="font-size:2em; color:var(--text-dim); line-height:1.8;">+</div>
+                <div style="text-align:center;">
+                    <p class="green" style="font-size:1.4em; font-weight:700; font-family:'JetBrains Mono';">TDD</p>
+                    <p class="muted" style="font-size:0.65em;">How to write them</p>
+                </div>
+                <div style="font-size:2em; color:var(--text-dim); line-height:1.8;">=</div>
+                <div style="text-align:center;">
+                    <p class="amber" style="font-size:1.4em; font-weight:700; font-family:'JetBrains Mono';">Confidence</p>
+                    <p class="muted" style="font-size:0.65em;">Ship without fear</p>
+                </div>
+            </div>
+            <blockquote style="text-align:center; border-left:none; max-width:80%; margin:0.8em auto;">
+                A tech lead's job is to build a team that can <strong style="color:var(--text-primary);">change code with confidence</strong>.
+            </blockquote>
+            <aside class="notes">
+                The test pyramid gives you the framework for where to invest your testing effort. TDD gives you a practice for how to write effective tests that also improve your design. Together, they let your team ship with confidence — which is ultimately what a tech lead is responsible for. Questions?
+            </aside>
+        </section>
+
+        <!-- RESOURCES -->
+        <section>
+            <span class="tag tag-purple">Resources</span>
+            <h2>Further Reading</h2>
+            <hr class="sep">
+            <ul style="font-size:0.65em;">
+                <li><strong>Martin Fowler</strong> — <em>The Practical Test Pyramid</em> (martinfowler.com)</li>
+                <li><strong>Kent Beck</strong> — <em>Test-Driven Development: By Example</em></li>
+                <li><strong>Ham Vocke</strong> — <em>The Practical Test Pyramid</em> (martinfowler.com)</li>
+                <li><strong>Ian Cooper</strong> — <em>"TDD, Where Did It All Go Wrong"</em> (talk)</li>
+            </ul>
+            <aside class="notes">
+                Some recommended resources if people want to dig deeper. Fowler's article on the test pyramid is the canonical reference. Kent Beck's book is the original TDD text — short and very practical. Ian Cooper's talk is great for understanding common TDD mistakes.
+            </aside>
+        </section>
+
+    </div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: true,
+        width: 1280,
+        height: 720,
+        margin: 0.08,
+        transition: 'fade',
+        transitionSpeed: 'fast',
+        plugins: [RevealHighlight, RevealNotes]
+    });
+</script>
+</body>
+</html>
