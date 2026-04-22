@@ -50,8 +50,12 @@ docs/
 ├── presentations.md     # Presentations listing
 ├── _posts/              # Blog posts
 │   └── YYYY-MM-DD-title.md
-└── presentations/       # Presentation files
-    └── day-in-life/
+├── _presentations/      # Presentation source HTML (Reveal.js)
+│   ├── day-in-life.html
+│   └── tdd-for-tech-leads.html
+└── presentations/       # Presentation assets (images, logos)
+    ├── assets/          # Shared logos (logo.png, upskill-tech.svg)
+    └── day-in-life/     # Day-in-life specific assets
 ```
 
 ## 🚀 Deployment
