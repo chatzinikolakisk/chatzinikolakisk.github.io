@@ -1,11 +1,10 @@
 # AGENTS.md
 
-**Generated:** 2026-04-22
 **Type:** Static site (Jekyll/GitHub Pages)
 
 ## Project
 
-Personal blog + presentations. Content written by engineering director.
+Personal blog + presentations + CV. Content written by engineering director.
 
 ## Structure
 
@@ -13,16 +12,26 @@ Personal blog + presentations. Content written by engineering director.
 docs/
 ├── _config.yml         # Jekyll configuration
 ├── _posts/             # Blog posts (YYYY-MM-DD-title.md)
+├── _drafts/            # Unpublished drafts
 ├── _presentations/     # HTML presentations (Jekyll collection)
+├── _includes/          # Reusable fragments (e.g. cv_body.md)
 ├── presentations/      # Static assets for presentations
-├── _site/             # Generated site (ignored in git)
-└── vendor/            # Bundler dependencies (ignored in git)
+├── assets/             # Static files (PDFs, scss, js)
+├── cv.md               # CV page wrapper (renders /cv/)
+├── _site/              # Generated site (gitignored)
+└── vendor/             # Bundler dependencies (gitignored)
+cv/
+├── resume.yaml         # RenderCV source-of-truth
+└── README.md           # Render + publish ritual
 ```
 
 ## Commands
 
 ```bash
-docker-compose up  # Dev server at localhost:4000
+docker-compose up                                    # Jekyll dev server at localhost:4000
+docker run --rm --entrypoint rendercv \
+  -v "$PWD":/work -w /work rendercv/rendercv \
+  render resume.yaml                                 # CV render (from cv/)
 ```
 
 ## Content Patterns
@@ -38,27 +47,19 @@ docker-compose up  # Dev server at localhost:4000
   categories: category-name
   ---
   ```
-- Categories: work, personal, tech
+- Categories: `work`, `personal`, `tech`
 
 ### Presentations
 - Location: `docs/_presentations/` (HTML with Reveal.js)
 - Assets: `docs/presentations/[presentation-name]/`
 
+### CV
+- Source: `cv/resume.yaml` (RenderCV, `engineeringresumes` theme).
+- Render produces `docs/assets/Konstantinos_Chatzinikolakis_CV.pdf` + `docs/_includes/cv_body.md`.
+- Page wrapper: `docs/cv.md`. See `cv/README.md` for publish ritual.
+
 ## Theme & Deployment
 
-- Theme: Minima with custom navigation (blog.md, presentations.md)
-- Deployment: automatic on push to main → https://chatzinikolakisk.github.io
-- Uses GitHub Pages compatible gems only
-
-## User Preferences (How I Work)
-
-- **Be tight on what, silent on how** - define constraints, not methods
-- **Create space** - exploratory work should feel brave, not require permission
-- **Constraint-based over method-prescriptive** - "every API has contract tests" > "follow these 14 rules"
-- **No territorial behavior** - don't gatekeep exploration
-
-## Anti-Patterns (THIS PROJECT)
-
-- Process as control (using governance language to shut down exploration)
-- Requiring permission for exploratory code
-- Senior unilaterally deciding then enforcing process on others
+- Theme: Minima with custom navigation (`header_pages` in `_config.yml`).
+- Deployment: automatic on push to `main` → https://chatzinikolakisk.github.io
+- GitHub Pages compatible gems only.
