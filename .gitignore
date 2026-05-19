@@ -24,3 +24,6 @@ docs/Gemfile.lock
 
 # Docker
 .env
+
+skills
+docs/_drafts
