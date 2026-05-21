@@ -1,28 +1,33 @@
 ---
 layout: default
-title: Home
+title: Konstantinos Chatzinikolakis
 ---
 
-# Welcome
+# Konstantinos Chatzinikolakis
 
-Hi, I'm Konstantinos Chatzinikolakis, a software engineer passionate about technology and sharing knowledge.
+Engineering director at Epignosis. Backend by trade. Eight years from IC to
+director, modernizing platforms and growing engineers along the way.
 
-## Recent Blog Posts
+I write about engineering leadership, legacy modernization, and the human side
+of building software.
+
+[Download CV (PDF)](/assets/Konstantinos_Chatzinikolakis_CV.pdf) ·
+[Email](mailto:chatzinikolakisk@gmail.com) ·
+[LinkedIn](https://www.linkedin.com/in/chatzinikolakisk) ·
+[GitHub](https://github.com/chatzinikolakisk)
+
+## Recent posts
 
 {% for post in site.posts limit:3 %}
-- [{{ post.title }}]({{ post.url }}) - {{ post.date | date: "%B %d, %Y" }}
+- [{{ post.title }}]({{ post.url }}) — {{ post.date | date: "%b %d, %Y" }}
 {% endfor %}
 
-[View all posts →](/blog/)
+[All posts →](/blog/)
 
-## Latest Presentations
+## Recent talks
 
-{% for presentation in site.presentations limit:2 %}
+{% for presentation in site.presentations limit:3 %}
 - [{{ presentation.title }}]({{ presentation.url }})
 {% endfor %}
 
-[View all presentations →](/presentations/)
-
----
-
-*Built with Jekyll and hosted on GitHub Pages*
+[All talks →](/presentations/)

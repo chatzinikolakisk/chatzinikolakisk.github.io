@@ -14,24 +14,30 @@ docs/
 ├── _posts/             # Blog posts (YYYY-MM-DD-title.md)
 ├── _drafts/            # Unpublished drafts
 ├── _presentations/     # HTML presentations (Jekyll collection)
-├── _includes/          # Reusable fragments (e.g. cv_body.md)
+├── _includes/          # Reusable fragments + minima overrides (e.g. footer.html)
 ├── presentations/      # Static assets for presentations
 ├── assets/             # Static files (PDFs, scss, js)
-├── cv.md               # CV page wrapper (renders /cv/)
 ├── _site/              # Generated site (gitignored)
 └── vendor/             # Bundler dependencies (gitignored)
 cv/
-├── resume.yaml         # RenderCV source-of-truth
-└── README.md           # Render + publish ritual
+└── resume.yaml         # RenderCV source-of-truth
 ```
 
 ## Commands
 
 ```bash
 docker-compose up                                    # Jekyll dev server at localhost:4000
+
+# CV render + publish (run from cv/)
 docker run --rm --entrypoint rendercv \
   -v "$PWD":/work -w /work rendercv/rendercv \
-  render resume.yaml                                 # CV render (from cv/)
+  render resume.yaml
+cp rendercv_output/*.pdf ../docs/assets/Konstantinos_Chatzinikolakis_CV.pdf
+
+# CV watch mode (re-renders on save; rendercv_output/ is gitignored)
+docker run --rm -it --entrypoint rendercv \
+  -v "$PWD":/work -w /work rendercv/rendercv \
+  render resume.yaml --watch
 ```
 
 ## Content Patterns
@@ -55,8 +61,8 @@ docker run --rm --entrypoint rendercv \
 
 ### CV
 - Source: `cv/resume.yaml` (RenderCV, `engineeringresumes` theme).
-- Render produces `docs/assets/Konstantinos_Chatzinikolakis_CV.pdf` + `docs/_includes/cv_body.md`.
-- Page wrapper: `docs/cv.md`. See `cv/README.md` for publish ritual.
+- Render produces `docs/assets/Konstantinos_Chatzinikolakis_CV.pdf` (canonical artifact).
+- No HTML CV page — PDF linked from homepage CTA and footer.
 
 ## Theme & Deployment
 
