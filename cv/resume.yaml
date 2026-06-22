@@ -18,9 +18,9 @@ cv:
         location: Remote
         highlights:
           - Lead 31 engineers across 3 SaaS products through product and platform team leads (engineering and QA); report to CTO.
-          - Delivered the cross-product seamless login PoC, then transferred ownership for scale-out as part of a platform unification initiative.
-          - "Set engineering excellence direction for one product: event-driven architecture, domain-driven service isolation, and a foundation other teams can build on."
-          - "Stayed hands-on: ran pair code reviews, migrated CI for one product (caught silently-failing static analysis), and contributed where infrastructure had dark corners."
+          - Proved cross-product seamless login, then handed it off to scale as part of a platform-unification push.
+          - Drove event-driven, domain-isolated service architecture that other teams build on.
+          - Stayed technically close enough to unblock teams and keep architecture decisions honest.
           - Grew team leads to stand on their own feet, coaching them to define end states, hold hard conversations, and make decisions without escalating; promoted a new team lead from within.
       - company: Epignosis
         position: Head of Engineering & Product

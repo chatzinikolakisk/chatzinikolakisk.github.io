@@ -28,7 +28,7 @@ cv/
 ```bash
 docker-compose up                                    # Jekyll dev server at localhost:4000
 
-# CV render + publish (run from cv/)
+# CV render + publish (run from cv/; needs Docker daemon running, e.g. OrbStack)
 docker run --rm --entrypoint rendercv \
   -v "$PWD":/work -w /work rendercv/rendercv \
   render resume.yaml
@@ -60,7 +60,7 @@ docker run --rm -it --entrypoint rendercv \
 - Assets: `docs/presentations/[presentation-name]/`
 
 ### CV
-- Source: `cv/resume.yaml` (RenderCV, `engineeringresumes` theme).
+- Source: `cv/resume.yaml` (RenderCV, `classic` theme; sole canonical source).
 - Render produces `docs/assets/Konstantinos_Chatzinikolakis_CV.pdf` (canonical artifact).
 - No HTML CV page — PDF linked from homepage CTA and footer.
 
