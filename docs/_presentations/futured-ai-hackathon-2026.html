@@ -1,0 +1,510 @@
+---
+layout: null
+title: FuturEd AI 2026 Kickoff
+date: 2026-09-30
+category: Hackathon
+description: Kickoff talk for the FuturEd AI Hackathon 2026 at the Computer Science Department, University of Crete.
+permalink: /presentations/futured-ai-hackathon-2026/futured-ai-hackathon-2026.html
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuturEd AI 2026 Kickoff</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/black.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Event font, loaded from the hackathon site (licensed, not copied here). */
+        @font-face { font-family: 'PF Futura Neu'; src: url('https://hackathon.csd.uoc.gr/assets/fonts/PFFUTURA_FONT_FAMILY/PFFuturaNeu%20Book.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+        @font-face { font-family: 'PF Futura Neu'; src: url('https://hackathon.csd.uoc.gr/assets/fonts/PFFUTURA_FONT_FAMILY/PFFuturaNeu%20Medium.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+        @font-face { font-family: 'PF Futura Neu'; src: url('https://hackathon.csd.uoc.gr/assets/fonts/PFFUTURA_FONT_FAMILY/PFFuturaNeu%20SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+        @font-face { font-family: 'PF Futura Neu'; src: url('https://hackathon.csd.uoc.gr/assets/fonts/PFFUTURA_FONT_FAMILY/PFFuturaNeu%20Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
+        /* Colours from hackathon.csd.uoc.gr */
+        :root {
+            --pink: #e84db5;
+            --pink-hot: #ff4fc3;
+            --cyan: #24fffb;
+            --purple: #512da8;
+            --gray: #c1c5c8;
+            --muted: #9aa3c7;
+            --navy: #070d3a;
+            --navy-track: rgb(2, 20, 73);
+            --font: 'PF Futura Neu', 'Futura', 'Jost', sans-serif;
+
+            --r-background-color: var(--navy);
+            --r-main-font: var(--font);
+            --r-main-font-size: 32px;
+            --r-main-color: #ffffff;
+            --r-heading-font: var(--font);
+            --r-heading-color: #ffffff;
+            --r-heading-text-transform: none;
+            --r-heading-font-weight: 700;
+            --r-heading-letter-spacing: -0.01em;
+            --r-link-color: var(--pink);
+            --r-link-color-hover: var(--pink-hot);
+            --r-code-font: 'JetBrains Mono', monospace;
+        }
+
+        .reveal-viewport {
+            background-color: var(--navy);
+            background-image:
+                radial-gradient(ellipse 55% 60% at 0% 100%, rgba(232, 77, 181, 0.28) 0%, rgba(232, 77, 181, 0) 70%),
+                radial-gradient(ellipse 45% 50% at 100% 0%, rgba(36, 255, 251, 0.12) 0%, rgba(36, 255, 251, 0) 70%),
+                radial-gradient(ellipse 90% 90% at 60% 40%, #0e1b70 0%, #081048 50%, #040826 100%);
+        }
+
+        .reveal { font-family: var(--font); color: #fff; }
+        .reveal section { text-align: left; }
+        .reveal .center-slide { text-align: center; }
+        .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; text-transform: none; }
+        .reveal h1 { font-size: 2.6em; line-height: 1.05; margin: 0 0 0.35em; }
+        .reveal h2 { font-size: 1.5em; line-height: 1.15; margin: 0; }
+        .reveal h3 { font-size: 0.8em; margin: 0 0 0.3em; }
+        .reveal p { margin: 0; }
+        .reveal section img { margin: 0; }
+
+        .pink { color: var(--pink); }
+        .hot { color: var(--pink-hot); }
+        .cyan { color: var(--cyan); }
+        .muted { color: var(--muted); }
+        .gray { color: var(--gray); }
+
+        .sep { width: 60px; height: 3px; background: var(--pink); border: none; border-radius: 2px; margin: 0.4em 0 0.9em; }
+        .center-slide .sep { margin-left: auto; margin-right: auto; }
+        .reveal .subtitle { font-size: 0.75em; color: var(--cyan); margin-top: 0.15em; }
+
+        /* Progress bar and slide number, like the site */
+        .reveal .progress { top: 0; bottom: auto; height: 4px; background: var(--navy-track); color: var(--pink); }
+        .reveal .slide-number { top: 14px; right: 18px; bottom: auto; background: transparent; color: var(--muted); font-family: var(--font); font-size: 13px; }
+
+        /* Logos in the corners of the screen */
+        .brand { transition: opacity 0.3s; pointer-events: none; }
+        .brand img { position: fixed; z-index: 30; opacity: 0.9; }
+        .brand .b-futured { left: 2.4vh; bottom: 2.2vh; height: 5vh; }
+        .brand .b-uoc { right: 2.4vh; bottom: 2vh; height: 4.6vh; }
+        .brand .b-epignosis { right: 9vh; bottom: 3.9vh; height: 1.7vh; }
+        .hide-brand .brand { opacity: 0; }
+
+        /* Components (site styles) */
+        .badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(232, 77, 181, 0.25); border: 2px solid var(--pink);
+            border-radius: 40px; padding: 8px 20px 7px;
+            font-weight: 700; font-size: 0.5em; color: #fff;
+            box-shadow: 0 0 10px rgba(255, 79, 195, 0.2);
+        }
+        .badge svg { width: 18px; height: 18px; fill: currentColor; }
+        .badge.cyan { background: rgba(36, 255, 251, 0.1); border-color: var(--cyan); color: #fff; box-shadow: 0 0 10px rgba(36, 255, 251, 0.2); }
+        .badges { display: flex; gap: 14px; flex-wrap: wrap; }
+
+        .card {
+            background: rgba(232, 77, 181, 0.1); border: 1px solid var(--pink);
+            border-radius: 14px; padding: 0.8em 0.9em;
+            backdrop-filter: blur(25px);
+        }
+        .card.cyan { background: rgba(36, 255, 251, 0.06); border-color: var(--cyan); }
+        .card p { font-size: 0.56em; color: var(--gray); line-height: 1.4; }
+        .card ul { list-style: none; margin: 0; padding: 0; }
+        .card li { font-size: 0.56em; color: var(--gray); line-height: 1.35; margin: 0 0 0.25em; padding-left: 0.9em; position: relative; }
+        .card li::before { content: ''; position: absolute; left: 0; top: 0.5em; width: 7px; height: 7px; border-radius: 50%; background: var(--pink); }
+        .num { font-weight: 700; color: var(--pink); font-size: 1.2em; line-height: 1; margin-bottom: 0.3em; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; align-items: stretch; }
+        .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; align-items: stretch; }
+
+        /* Title slide */
+        .hero { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1.2em; align-items: center; }
+        .reveal .hero-logo { width: 190px; margin: 0 0 0.9em; display: block; }
+        .hero-right img { width: 100%; max-height: 520px; object-fit: contain; display: block; }
+        .reveal .byline { font-size: 0.55em; color: var(--gray); margin-top: 1.1em; }
+        .byline strong { color: #fff; font-weight: 500; }
+        .orgs { display: flex; align-items: center; gap: 22px; margin-top: 1.4em; }
+        .orgs .label { font-size: 0.42em; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+        .orgs .o-epignosis { height: 20px; }
+        .orgs .o-uoc { height: 52px; }
+        .center-slide .orgs { justify-content: center; }
+
+        /* The clock */
+        .day { display: grid; grid-template-columns: 170px 1fr; align-items: start; margin: 0.4em 0 1em; }
+        .day-label { font-weight: 600; color: var(--cyan); letter-spacing: 0.08em; font-size: 0.55em; text-transform: uppercase; padding-top: 0.2em; }
+        .track { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); }
+        .track::before { content: ''; position: absolute; left: 12px; right: 0; top: 13px; height: 3px; background: linear-gradient(90deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.2)); }
+        .stop { position: relative; padding-top: 44px; }
+        .stop::before { content: ''; position: absolute; top: 2px; left: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 0 5px rgba(232, 77, 181, 0.25); }
+        .stop .time { font-weight: 500; font-size: 0.7em; }
+        .stop .what { font-size: 0.55em; color: var(--gray); line-height: 1.3; }
+        .stop.key::before { width: 34px; height: 34px; top: -2px; left: -4px; background: var(--pink-hot); box-shadow: 0 0 22px 6px rgba(255, 79, 195, 0.6); }
+        .stop.key .time, .stop.key .what { color: var(--pink-hot); font-weight: 700; }
+
+        /* Judging */
+        .axis img { height: 54px; margin-bottom: 0.3em; display: block; }
+        .formula { display: flex; align-items: center; gap: 12px; font-size: 0.52em; margin: 0.35em 0; }
+        .formula .chip { border: 1px solid var(--pink); border-radius: 30px; padding: 4px 14px 3px; background: rgba(232, 77, 181, 0.12); }
+        .formula .chip.p { border-color: var(--cyan); background: rgba(36, 255, 251, 0.1); }
+        .formula .award { font-weight: 700; }
+        .formula .op { color: var(--muted); }
+        .reveal .note { font-size: 0.5em; color: var(--muted); margin-top: 0.6em; }
+
+        /* Awards */
+        .prize { text-align: center; padding: 0.9em 0.6em; border-radius: 16px; }
+        .prize h3 { font-size: 0.66em; }
+        .prize .amount { font-size: 1.15em; font-weight: 700; color: var(--pink-hot); line-height: 1.1; }
+        .prize .sub { font-size: 0.48em; color: var(--muted); margin-top: 0.2em; }
+        .special { display: grid; grid-template-columns: 0.55fr 1.45fr; gap: 1em; align-items: center; margin-top: 0.8em; box-shadow: 0 0 26px rgba(36, 255, 251, 0.18); }
+        .special .amount { font-size: 1.5em; font-weight: 700; color: var(--cyan); line-height: 1; }
+        .special .label { font-size: 0.5em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 0.25em; }
+        .special .lead { font-size: 0.66em; font-weight: 500; margin-bottom: 0.35em; }
+        .special p { font-size: 0.56em; }
+
+        /* Models */
+        .model h3 { font-size: 0.95em; }
+        .model p { font-size: 0.62em; }
+        .model .label { font-size: 0.48em; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pink); margin-bottom: 0.3em; }
+        .model.cyan .label { color: var(--cyan); }
+        .callout {
+            margin-top: 0.9em; padding: 0.55em 0.9em; border-radius: 40px;
+            background: var(--pink); color: #fff; font-weight: 700; font-size: 0.62em;
+            text-align: center; box-shadow: 0 0 22px rgba(255, 79, 195, 0.35);
+        }
+        .reveal .fine { font-size: 0.52em; color: var(--gray); margin-top: 0.8em; text-align: center; }
+
+        /* Code with AI */
+        .code-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1em; align-items: start; }
+        .reveal pre { width: 100%; margin: 0.3em 0 0.5em; box-shadow: none; font-size: 0.48em; }
+        .reveal pre code {
+            font-family: 'JetBrains Mono', monospace; line-height: 1.7; max-height: none;
+            background: rgba(4, 8, 38, 0.85); border: 1px solid rgba(36, 255, 251, 0.35);
+            border-radius: 10px; padding: 0.8em 1em; white-space: pre; color: #fff;
+        }
+        .prompt { color: var(--pink); }
+        .reveal .alt { font-size: 0.5em; color: var(--gray); margin: 0.25em 0; }
+        .alt code { font-family: 'JetBrains Mono', monospace; color: var(--cyan); font-size: 0.95em; }
+        .tools { display: flex; flex-direction: column; gap: 12px; margin-top: 0.4em; }
+        .tools .badge { font-size: 0.56em; justify-content: center; }
+
+        /* Questions */
+        .q { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 0.6em; padding: 0.45em 0; border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+        .q:last-of-type { border-bottom: none; }
+        .q .num { margin: 0; font-size: 1.1em; }
+        .q .text { font-size: 0.85em; font-weight: 500; }
+        .q .badge { font-size: 0.42em; }
+
+        /* Help */
+        .reveal .big-list { list-style: none; margin: 0; padding: 0; }
+        .reveal .big-list li { font-size: 0.85em; margin: 0 0 0.55em; padding-left: 1.1em; position: relative; }
+        .big-list li::before { content: ''; position: absolute; left: 0; top: 0.42em; width: 14px; height: 14px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 10px rgba(255, 79, 195, 0.6); }
+
+        /* Final slide */
+        .reveal .final-logo { width: 150px; margin: 0 auto 0.8em; display: block; }
+        .countdown {
+            font-weight: 700; font-size: 3em; line-height: 1; color: var(--pink-hot);
+            text-shadow: 0 0 30px rgba(255, 79, 195, 0.55); font-variant-numeric: tabular-nums;
+            margin: 0.15em 0 0.2em;
+        }
+        .small { font-size: 0.55em; }
+    </style>
+</head>
+<body>
+
+<div class="brand" aria-hidden="true">
+    <img class="b-futured" src="/presentations/futured-ai-hackathon-2026/futured-ai-logo.svg" alt="">
+    <img class="b-epignosis" src="/presentations/futured-ai-hackathon-2026/epignosis-logo.svg" alt="">
+    <img class="b-uoc" src="/presentations/futured-ai-hackathon-2026/uoc-logo.svg" alt="">
+</div>
+
+<div class="reveal">
+    <div class="slides">
+
+        <!-- TITLE -->
+        <section data-state="hide-brand">
+            <div class="hero">
+                <div>
+                    <img class="hero-logo" src="/presentations/futured-ai-hackathon-2026/futured-ai-logo.svg" alt="FuturEd AI">
+                    <h1>You have<br><span class="hot">28 hours</span>.</h1>
+                    <div class="badges">
+                        <span class="badge"><svg viewBox="0 0 16 16"><path d="M8 0a5.53 5.53 0 0 0-5.5 5.5c0 3.313 5.5 10.5 5.5 10.5s5.5-7.187 5.5-10.5A5.53 5.53 0 0 0 8 0zm0 8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>Computer Science Department, UoC</span>
+                        <span class="badge"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z"/></svg>1-2 Oct 2026</span>
+                    </div>
+                    <p class="byline">Kickoff · <strong>Konstantinos Chatzinikolakis</strong>, Engineering Director, Epignosis</p>
+                    <div class="orgs">
+                        <img class="o-epignosis" src="/presentations/futured-ai-hackathon-2026/epignosis-logo.svg" alt="Epignosis">
+                        <img class="o-uoc" src="/presentations/futured-ai-hackathon-2026/uoc-logo.svg" alt="University of Crete, Computer Science Department">
+                    </div>
+                </div>
+                <div class="hero-right">
+                    <img src="/presentations/futured-ai-hackathon-2026/face.svg" alt="">
+                </div>
+            </div>
+            <aside class="notes">
+                Good morning and welcome to FuturEd AI 2026. I am Kostas, engineering director at Epignosis, and one of your mentors. From 11:00 today to 15:00 tomorrow you have 28 hours. This talk is short. Then the time is yours.
+            </aside>
+        </section>
+
+        <!-- THE CLOCK -->
+        <section>
+            <h2>The clock</h2>
+            <hr class="sep">
+            <div class="day">
+                <div class="day-label">Thu 1 Oct</div>
+                <div class="track">
+                    <div class="stop"><div class="time">11:00</div><div class="what">Hacking starts</div></div>
+                    <div class="stop"><div class="time">13:00</div><div class="what">Lunch</div></div>
+                    <div class="stop"><div class="time">18:30</div><div class="what">Pitch workshop</div></div>
+                    <div class="stop"><div class="time">19:00</div><div class="what">Dinner</div></div>
+                </div>
+            </div>
+            <div class="day">
+                <div class="day-label">Fri 2 Oct</div>
+                <div class="track">
+                    <div class="stop"><div class="time">10:00</div><div class="what">Breakfast</div></div>
+                    <div class="stop"><div class="time">13:00</div><div class="what">Lunch</div></div>
+                    <div class="stop key"><div class="time">15:00</div><div class="what">Code freeze<br>Pitching starts</div></div>
+                    <div class="stop"><div class="time">18:30</div><div class="what">Awards</div></div>
+                </div>
+            </div>
+            <aside class="notes">
+                Hacking starts at 11:00, right after this talk. Lunch at 13:00. The pitch workshop is today at 18:30. Please come, it helps a lot for tomorrow. On Friday: breakfast at 10:00, lunch at 13:00. Code freeze is Friday at 15:00. After 15:00, no more code. Pitching runs until about 18:20. Awards at 18:30.
+            </aside>
+        </section>
+
+        <!-- GROUND RULES -->
+        <section>
+            <h2>Three rules</h2>
+            <p class="subtitle">Everything else is yours.</p>
+            <hr class="sep">
+            <div class="three-col">
+                <div class="card">
+                    <div class="num">01</div>
+                    <h3>Start from scratch</h3>
+                    <p>No old projects. AI-written code is welcome.</p>
+                </div>
+                <div class="card">
+                    <div class="num">02</div>
+                    <h3>Commit often</h3>
+                    <p>Private GitHub repo. Add your mentor.</p>
+                </div>
+                <div class="card">
+                    <div class="num">03</div>
+                    <h3>Keys stay secret</h3>
+                    <p>Keep them in a .env file. Never commit it.</p>
+                </div>
+            </div>
+            <aside class="notes">
+                Only three rules. One: start from scratch, no old projects. AI-written code is fine, we expect it. Two: use a private GitHub repo, add your mentor, and commit often. We look at the commit history. It protects you: it shows you built it here. At the closing we will show some fun commit stats. Three: keys stay secret. Put them in a .env file and add it to .gitignore before your first commit.
+            </aside>
+        </section>
+
+        <!-- JUDGING -->
+        <section>
+            <h2>How you are judged</h2>
+            <hr class="sep">
+            <div class="three-col">
+                <div class="card axis">
+                    <img src="/presentations/futured-ai-hackathon-2026/icon-ai-innovation.svg" alt="">
+                    <h3>AI Innovation</h3>
+                    <ul><li>Novel approach</li><li>Creative AI techniques</li><li>Meaningful use of AI</li></ul>
+                </div>
+                <div class="card axis">
+                    <img src="/presentations/futured-ai-hackathon-2026/icon-impact.svg" alt="">
+                    <h3>Real World Impact</h3>
+                    <ul><li>Clear problem</li><li>Real-world use</li><li>A real need in education</li></ul>
+                </div>
+                <div class="card cyan axis">
+                    <img src="/presentations/futured-ai-hackathon-2026/icon-presentation.svg" alt="">
+                    <h3>Team Presentation</h3>
+                    <ul><li>Demo and storytelling</li><li>Clear technical story</li><li>Answers to questions</li></ul>
+                </div>
+            </div>
+            <div style="margin-top: 0.6em;">
+                <div class="formula"><span class="chip">AI Innovation</span><span class="op">+</span><span class="chip p">Presentation</span><span class="op">=</span><span class="award">AI Innovation Award</span></div>
+                <div class="formula"><span class="chip">Real World Impact</span><span class="op">+</span><span class="chip p">Presentation</span><span class="op">=</span><span class="award">Real World Impact Award</span></div>
+            </div>
+            <p class="note">Each axis scored 1 to 5 · One award per team · <span class="cyan">Presentation counts in both awards</span></p>
+            <aside class="notes">
+                Three axes, each scored 1 to 5. Look at the two formulas: presentation counts in both awards. So your demo is half of every score. Each team can win only one award. The community prize is a vote between the teams.
+            </aside>
+        </section>
+
+        <!-- AWARDS -->
+        <section>
+            <h2>Awards</h2>
+            <hr class="sep">
+            <div class="three-col">
+                <div class="card prize"><h3>AI Innovation Award</h3><div class="amount">€2,000</div></div>
+                <div class="card prize"><h3>Real World Impact Award</h3><div class="amount">€2,000</div></div>
+                <div class="card prize"><h3>Community Prize</h3><div class="amount">€2,000</div><div class="sub">voted by the teams</div></div>
+            </div>
+            <div class="card cyan special">
+                <div>
+                    <div class="label">Special prize</div>
+                    <div class="amount">€2,000</div>
+                </div>
+                <div>
+                    <p class="lead">Honorable mention, chosen by the mentors.</p>
+                    <p>From Dimitris Tsingos, CEO of Epignosis. He cannot be here, so he sends a last-minute gift to show Epignosis' strong commitment to this hackathon.</p>
+                </div>
+            </div>
+            <aside class="notes">
+                Three awards, 2,000 euros each. And one more. Dimitris Tsingos, our CEO, cannot be here. He asked us to add a special prize of 2,000 euros, as a gift to the community. The mentors choose a fourth team for it. All prizes are gift cards.
+            </aside>
+        </section>
+
+        <!-- MODELS AND KEYS -->
+        <section>
+            <h2>Two keys, two jobs</h2>
+            <hr class="sep">
+            <div class="two-col">
+                <div class="card model">
+                    <div class="label">To write code</div>
+                    <h3>Anthropic API key</h3>
+                    <p>For your coding tool. One key per team.</p>
+                </div>
+                <div class="card cyan model">
+                    <div class="label">Inside your app</div>
+                    <h3>AWS Bedrock</h3>
+                    <p>For the AI features you build. Plus related database services.</p>
+                </div>
+            </div>
+            <p class="fine">No spend limit. Keys work until pitching ends on Friday.</p>
+            <div class="callout">Keys arrive by email to the team lead. Check your inbox now.</div>
+            <aside class="notes">
+                Two keys, for two different jobs. To write code, you get an Anthropic API key. Use it with Claude Code or any tool on the next slide. Inside your app, you get AWS Bedrock and the related database services. That is for the AI features your users see, not for your coding tools. There is no spend limit. Both arrive by email to your team lead, please check now. They stop working after pitching ends on Friday.
+            </aside>
+        </section>
+
+        <!-- CODE WITH AI -->
+        <section>
+            <h2>Code with AI</h2>
+            <hr class="sep">
+            <div class="code-grid">
+                <div class="card cyan">
+                    <h3>Claude Code</h3>
+                    <pre><code><span class="prompt">$</span> curl -fsSL https://claude.ai/install.sh | bash
+<span class="prompt">$</span> export ANTHROPIC_API_KEY="key from the email"
+<span class="prompt">$</span> claude</code></pre>
+                    <p class="alt">Windows: <code>irm https://claude.ai/install.ps1 | iex</code></p>
+                    <p class="alt">Guide: <a href="https://code.claude.com/docs/en/quickstart">code.claude.com/docs/en/quickstart</a></p>
+                </div>
+                <div>
+                    <h3>Also works with your key</h3>
+                    <div class="tools">
+                        <span class="badge">GitHub Copilot</span>
+                        <span class="badge">Cursor</span>
+                        <span class="badge">OpenCode</span>
+                    </div>
+                </div>
+            </div>
+            <aside class="notes">
+                Use any tool you like, with the Anthropic key. If you want a quick start: Claude Code, three commands. Other popular tools work with the same key: GitHub Copilot, Cursor, OpenCode. Pick one and start. Do not spend the morning on setup.
+                Reference, most used AI coding tools at work (JetBrains survey, May to July 2026): Claude Code 39%, GitHub Copilot 21%, Cursor 12%, OpenCode 7%. Cursor uses your key only for Claude models you pick by hand.
+            </aside>
+        </section>
+
+        <!-- THREE QUESTIONS -->
+        <section>
+            <h2>Three questions we will keep asking</h2>
+            <hr class="sep">
+            <div class="q"><div class="num">01</div><div class="text">What problem, and for whom?</div><span class="badge">Real World Impact</span></div>
+            <div class="q"><div class="num">02</div><div class="text">Why does it need AI?</div><span class="badge">AI Innovation</span></div>
+            <div class="q"><div class="num">03</div><div class="text">What works on Friday at 15:00?</div><span class="badge cyan">Presentation</span></div>
+            <aside class="notes">
+                These are the three questions we asked you in the screening calls. We will keep asking them. Each one maps to a judging axis. If you can answer all three by tonight, you are in good shape.
+            </aside>
+        </section>
+
+        <!-- PROMPTS ARE CODE -->
+        <section>
+            <h2>Prompts are code</h2>
+            <hr class="sep">
+            <div class="three-col">
+                <div class="card">
+                    <div class="num">01</div>
+                    <h3>Give examples</h3>
+                    <p>One to three in the prompt. The model follows the pattern.</p>
+                </div>
+                <div class="card">
+                    <div class="num">02</div>
+                    <h3>Ask for JSON</h3>
+                    <p>Structured output. Validate it in code.</p>
+                </div>
+                <div class="card">
+                    <div class="num">03</div>
+                    <h3>Commit your prompts</h3>
+                    <p>Keep them in git, next to your code.</p>
+                </div>
+            </div>
+            <aside class="notes">
+                Treat prompts like code. Give the model a few examples. Ask for structured output and validate it. Commit your prompts, so when something breaks you can see what changed.
+            </aside>
+        </section>
+
+        <!-- HELP -->
+        <section>
+            <h2>Stuck? Ask a human.</h2>
+            <hr class="sep">
+            <ul class="big-list">
+                <li>No Discord this year.</li>
+                <li>Your mentor is in the room, both days.</li>
+                <li>Give your mentor your GitHub handle today.</li>
+            </ul>
+            <aside class="notes">
+                No Discord this year. Your mentor is in the room with you, both days. Give your mentor your GitHub handle today, so we get access to your repo. Any question, any time, just call us.
+            </aside>
+        </section>
+
+        <!-- GO -->
+        <section class="center-slide" data-state="hide-brand">
+            <img class="final-logo" src="/presentations/futured-ai-hackathon-2026/futured-ai-logo.svg" alt="FuturEd AI">
+            <h2>Questions?</h2>
+            <p class="muted small" style="margin-top: 1em;">Code freeze in</p>
+            <div class="countdown" data-countdown>28:00:00</div>
+            <p class="muted small">Friday 2 October, 15:00</p>
+            <div class="orgs">
+                <img class="o-epignosis" src="/presentations/futured-ai-hackathon-2026/epignosis-logo.svg" alt="Epignosis">
+                <img class="o-uoc" src="/presentations/futured-ai-hackathon-2026/uoc-logo.svg" alt="University of Crete, Computer Science Department">
+            </div>
+            <aside class="notes">
+                That is all from me. Questions? The clock is running: code freeze is Friday at 15:00. Go build.
+            </aside>
+        </section>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        width: 1280,
+        height: 720,
+        margin: 0.08,
+        controls: false,
+        transition: 'fade',
+        transitionSpeed: 'fast',
+        plugins: [RevealNotes]
+    });
+
+    // Live countdown to the code freeze: Friday 2 October 2026, 15:00 Athens time.
+    (function () {
+        var freeze = new Date('2026-10-02T15:00:00+03:00').getTime();
+        var el = document.querySelector('[data-countdown]');
+        function pad(n) { return n < 10 ? '0' + n : String(n); }
+        function tick() {
+            var s = Math.max(0, Math.floor((freeze - Date.now()) / 1000));
+            var h = Math.floor(s / 3600);
+            var m = Math.floor((s % 3600) / 60);
+            el.textContent = h + ':' + pad(m) + ':' + pad(s % 60);
+        }
+        tick();
+        setInterval(tick, 1000);
+    })();
+</script>
+</body>
+</html>
