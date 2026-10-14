@@ -1,0 +1,2445 @@
+---
+layout: null
+title: Gunslinger
+permalink: /gunslinger/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gunslinger - 3D Western Typing Showdown</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%232b1810' stroke='%23f5b942' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%23f5b942'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #f5b942;
+      --gold-bright: #ffe082;
+      --amber: #d97724;
+      --crimson: #e63946;
+      --parchment: #f4e8c1;
+      --leather: #2b1810;
+      --leather-dark: #160b06;
+      --teal-deadeye: #4dd0e1;
+      --hit-green: #7ae582;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #120907;
+      font-family: 'Special Elite', serif;
+      color: var(--parchment);
+    }
+
+    #game-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* Atmospheric Vignette & Damage / Deadeye FX */
+    #fx-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: radial-gradient(circle at center, transparent 55%, rgba(15, 6, 3, 0.72) 100%);
+      transition: box-shadow 0.25s ease, background 0.3s ease;
+    }
+
+    #fx-vignette.damage-flash {
+      box-shadow: inset 0 0 90px 35px rgba(230, 57, 70, 0.75);
+    }
+
+    #fx-vignette.deadeye-active {
+      background: radial-gradient(circle at center, rgba(245, 185, 66, 0.10) 40%, rgba(45, 24, 8, 0.82) 100%);
+      box-shadow: inset 0 0 70px 20px rgba(245, 185, 66, 0.45);
+    }
+
+    /* 2D Projected Word Labels Layer */
+    #labels-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .threat-label {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.06s ease-out;
+      will-change: left, top, transform;
+    }
+
+    .threat-label.locked {
+      z-index: 20;
+      transform: translate(-50%, -105%) scale(1.08);
+    }
+
+    .threat-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(22, 11, 6, 0.88);
+      border: 1px solid rgba(245, 185, 66, 0.45);
+      color: var(--gold);
+    }
+
+    .threat-label.pickup .threat-meta {
+      border-color: rgba(122, 229, 130, 0.65);
+      color: var(--hit-green);
+    }
+
+    .threat-label.boss .threat-meta {
+      border-color: rgba(230, 57, 70, 0.85);
+      color: #ff8a80;
+      background: rgba(48, 8, 12, 0.92);
+    }
+
+    .stage-pips {
+      display: inline-flex;
+      gap: 3px;
+    }
+
+    .stage-pip {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(244, 232, 193, 0.25);
+      border: 1px solid var(--gold);
+    }
+
+    .stage-pip.active {
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+    }
+
+    .stage-pip.done {
+      background: var(--hit-green);
+      border-color: var(--hit-green);
+    }
+
+    .prompt-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(18, 9, 6, 0.92);
+      border: 2px solid rgba(244, 232, 193, 0.45);
+      border-radius: 6px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65);
+    }
+
+    .threat-label.locked .prompt-box {
+      border-color: var(--gold-bright);
+      background: rgba(36, 17, 9, 0.96);
+      box-shadow: 0 0 18px rgba(245, 185, 66, 0.65), 0 8px 20px rgba(0, 0, 0, 0.75);
+    }
+
+    .threat-label.pickup .prompt-box {
+      border-color: rgba(122, 229, 130, 0.6);
+    }
+
+    .threat-label.misfire .prompt-box {
+      border-color: var(--crimson);
+      animation: shakePrompt 0.22s ease;
+    }
+
+    @keyframes shakePrompt {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .urgency-ring {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      transform: rotate(-90deg);
+    }
+
+    .urgency-ring circle {
+      fill: none;
+      stroke-width: 3.2;
+    }
+
+    .urgency-bg {
+      stroke: rgba(244, 232, 193, 0.16);
+    }
+
+    .urgency-fg {
+      stroke: var(--gold);
+      stroke-linecap: round;
+      transition: stroke 0.15s ease;
+    }
+
+    .word-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .threat-label.boss .word-text {
+      font-size: 20px;
+    }
+
+    .char-typed {
+      color: var(--hit-green);
+      text-shadow: 0 0 8px rgba(122, 229, 130, 0.65);
+    }
+
+    .char-next {
+      color: var(--gold-bright);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .char-rem {
+      color: var(--parchment);
+    }
+
+    /* HUD Overlay */
+    #hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 24px;
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .hud-panel {
+      background: linear-gradient(180deg, rgba(35, 18, 11, 0.9) 0%, rgba(20, 10, 6, 0.92) 100%);
+      border: 2px solid rgba(245, 185, 66, 0.5);
+      border-radius: 8px;
+      padding: 10px 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+    }
+
+    .hud-vital-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hearts-wrap {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .heart-icon {
+      font-size: 22px;
+      color: var(--crimson);
+      text-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .heart-icon.empty {
+      color: rgba(244, 232, 193, 0.2);
+      text-shadow: none;
+      transform: scale(0.85);
+    }
+
+    .cylinder-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(245, 185, 66, 0.3);
+    }
+
+    #cylinder-svg {
+      width: 38px;
+      height: 38px;
+      transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .hud-subtext {
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: rgba(244, 232, 193, 0.8);
+      letter-spacing: 0.05em;
+    }
+
+    .hud-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      gap: 10px 20px;
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: rgba(244, 232, 193, 0.65);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gold-bright);
+    }
+
+    .stat-value.combo-hot {
+      color: var(--hit-green);
+      text-shadow: 0 0 10px rgba(122, 229, 130, 0.55);
+    }
+
+    /* Boss Top-Center Health Bar */
+    #boss-hud {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(460px, 88vw);
+      background: rgba(32, 8, 10, 0.94);
+      border: 2px solid var(--crimson);
+      border-radius: 8px;
+      padding: 10px 16px;
+      text-align: center;
+      box-shadow: 0 0 26px rgba(230, 57, 70, 0.5);
+      display: none;
+      z-index: 5;
+    }
+
+    #boss-hud.visible {
+      display: block;
+    }
+
+    .boss-title {
+      font-family: 'Rye', serif;
+      font-size: 16px;
+      color: #ff8a80;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .boss-bar-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 138, 128, 0.45);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    #boss-bar-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff5252 0%, #f5b942 100%);
+      transition: width 0.2s ease;
+    }
+
+    /* Wave / Rail Transition Banner */
+    #wave-banner {
+      position: fixed;
+      top: 34%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.92);
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 6;
+      background: rgba(20, 10, 6, 0.88);
+      border-top: 2px solid var(--gold);
+      border-bottom: 2px solid var(--gold);
+      padding: 14px 38px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75);
+    }
+
+    #wave-banner.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #wave-banner-title {
+      font-family: 'Rye', serif;
+      font-size: clamp(26px, 4vw, 42px);
+      color: var(--gold-bright);
+      letter-spacing: 0.08em;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.9);
+    }
+
+    #wave-banner-sub {
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--parchment);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* Bottom HUD Hints & Deadeye Bar */
+    .hud-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .controls-hint {
+      background: rgba(20, 10, 6, 0.82);
+      border: 1px solid rgba(245, 185, 66, 0.35);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: rgba(244, 232, 193, 0.85);
+    }
+
+    .controls-hint kbd {
+      background: rgba(245, 185, 66, 0.2);
+      border: 1px solid var(--gold);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: var(--gold-bright);
+      font-weight: 700;
+    }
+
+    #deadeye-pill {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(38, 24, 6, 0.92);
+      border: 2px solid var(--gold-bright);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--gold-bright);
+      box-shadow: 0 0 18px rgba(245, 185, 66, 0.55);
+    }
+
+    #deadeye-pill.visible {
+      display: inline-flex;
+    }
+
+    /* Fullscreen Overlays (Start & Game Over) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: radial-gradient(circle at center, rgba(28, 14, 8, 0.84) 0%, rgba(10, 5, 3, 0.94) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .wanted-poster {
+      max-width: 720px;
+      width: 100%;
+      background: linear-gradient(180deg, #2b170e 0%, #190c06 100%);
+      border: 3px solid var(--gold);
+      border-radius: 12px;
+      padding: 28px 32px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), inset 0 0 40px rgba(245, 185, 66, 0.12);
+    }
+
+    .poster-kicker {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 6px;
+    }
+
+    .poster-title {
+      font-family: 'Rye', serif;
+      font-size: clamp(36px, 6vw, 58px);
+      color: var(--gold-bright);
+      letter-spacing: 0.08em;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
+      margin-bottom: 8px;
+    }
+
+    .poster-subtitle {
+      font-size: 16px;
+      color: var(--parchment);
+      opacity: 0.9;
+      margin-bottom: 20px;
+      line-height: 1.45;
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      text-align: left;
+      margin-bottom: 22px;
+    }
+
+    .guide-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(245, 185, 66, 0.32);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .guide-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .guide-card-desc {
+      font-size: 13px;
+      color: rgba(244, 232, 193, 0.85);
+      line-height: 1.35;
+    }
+
+    .draw-btn {
+      cursor: pointer;
+      font-family: 'Rye', serif;
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1a0c05;
+      background: linear-gradient(180deg, var(--gold-bright) 0%, var(--amber) 100%);
+      border: 2px solid #fff3c4;
+      border-radius: 8px;
+      padding: 12px 32px;
+      box-shadow: 0 6px 20px rgba(245, 185, 66, 0.45);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .draw-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(245, 185, 66, 0.65);
+    }
+
+    .gameover-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0 24px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .go-stat-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(245, 185, 66, 0.35);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .go-stat-label {
+      font-size: 11px;
+      color: rgba(244, 232, 193, 0.7);
+      text-transform: uppercase;
+    }
+
+    .go-stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--gold-bright);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+  <div id="fx-vignette"></div>
+  <div id="labels-layer"></div>
+
+  <!-- Boss Top-Center Bar -->
+  <div id="boss-hud">
+    <div class="boss-title" id="boss-name">SHERIFF BLACKWOOD - STANDOFF</div>
+    <div class="boss-bar-track">
+      <div id="boss-bar-fill"></div>
+    </div>
+  </div>
+
+  <!-- Wave / Rail Transition Banner -->
+  <div id="wave-banner">
+    <div id="wave-banner-title">WAVE 1</div>
+    <div id="wave-banner-sub">STOP 1: TOWN GATE</div>
+  </div>
+
+  <!-- Main HUD -->
+  <div id="hud">
+    <div class="hud-top">
+      <div class="hud-panel">
+        <div class="hud-vital-row">
+          <div class="hearts-wrap" id="hearts-display" aria-label="Health"></div>
+          <div class="cylinder-wrap" title="Six-Shooter Cylinder">
+            <svg id="cylinder-svg" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="28" fill="#2a1f1d" stroke="#f5b942" stroke-width="3"/>
+              <circle cx="32" cy="32" r="6" fill="#f5b942"/>
+              <circle class="chamber-dot" cx="32" cy="12" r="6" fill="#ffe082"/>
+              <circle class="chamber-dot" cx="49" cy="22" r="6" fill="#ffe082"/>
+              <circle class="chamber-dot" cx="49" cy="42" r="6" fill="#ffe082"/>
+              <circle class="chamber-dot" cx="32" cy="52" r="6" fill="#ffe082"/>
+              <circle class="chamber-dot" cx="15" cy="42" r="6" fill="#ffe082"/>
+              <circle class="chamber-dot" cx="15" cy="22" r="6" fill="#ffe082"/>
+            </svg>
+          </div>
+        </div>
+        <div class="hud-subtext">
+          <span id="hud-wave">WAVE 1</span> | <span id="hud-stop">TOWN GATE</span>
+        </div>
+      </div>
+
+      <div class="hud-panel hud-stats-grid">
+        <div class="stat-item">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="hud-score">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Combo</span>
+          <span class="stat-value" id="hud-combo">x1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Best</span>
+          <span class="stat-value" id="hud-highscore">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">WPM</span>
+          <span class="stat-value" id="hud-wpm">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Accuracy</span>
+          <span class="stat-value" id="hud-acc">100%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Outlaws Left</span>
+          <span class="stat-value" id="hud-remaining">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="controls-hint">
+        Type <kbd>A-Z</kbd> to lock &amp; fire | <kbd>TAB</kbd> or <kbd>ESC</kbd> to unlock target
+      </div>
+      <div id="deadeye-pill">
+        <span>DEADEYE SLOW-MO</span>
+        <span id="deadeye-timer">6.0s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Screen Overlay -->
+  <div class="modal-overlay" id="start-overlay">
+    <div class="wanted-poster">
+      <div class="poster-kicker">HIGH NOON RAIL SHOOTER</div>
+      <h1 class="poster-title">GUNSLINGER</h1>
+      <p class="poster-subtitle">
+        Patrol the 3-stop Red Rock Main Street loop (Town Gate, Saloon Porch, Bank Courtyard).
+        Type outlaw words before their attack rings close. Every 5th wave brings the Sheriff standoff.
+      </p>
+      <div class="guide-grid">
+        <div class="guide-card">
+          <div class="guide-card-title">Bandit (1 Word)</div>
+          <div class="guide-card-desc">Steps out from cover and draws fast. Gun him down before his ring fills.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-card-title">Dynamite Tosser</div>
+          <div class="guide-card-desc">Hurls lit dynamite in a 3D arc. Type the short fuse word mid-air to shoot it down.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-card-title">Poncho Brute (2 Words)</div>
+          <div class="guide-card-desc">First word blasts off his hat and poncho armor. Second word finishes the job.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-card-title">The Sheriff (Every 5th Wave)</div>
+          <div class="guide-card-desc">3-phrase boss showdown with a top health bar. Survive his rapid barrage.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-card-title">Whiskey &amp; Pocket Watch</div>
+          <div class="guide-card-desc">Shoot whiskey bottles for +1 Heart or pocket watches for Deadeye slow-motion.</div>
+        </div>
+        <div class="guide-card">
+          <div class="guide-card-title">Zero-Latency Lock</div>
+          <div class="guide-card-desc">First letter locks nearest matching word. Press Tab or Esc anytime to switch target.</div>
+        </div>
+      </div>
+      <button class="draw-btn" id="start-btn" type="button">PRESS ENTER OR CLICK TO DRAW</button>
+    </div>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div class="modal-overlay hidden" id="gameover-overlay">
+    <div class="wanted-poster">
+      <div class="poster-kicker">OUTGUNNED AT SUNDOWN</div>
+      <h2 class="poster-title">SHOWDOWN OVER</h2>
+      <p class="poster-subtitle" id="gameover-reason">The outlaws got the drop on you.</p>
+      <div class="gameover-stats">
+        <div class="go-stat-box">
+          <div class="go-stat-label">Wave Reached</div>
+          <div class="go-stat-val" id="go-wave">1</div>
+        </div>
+        <div class="go-stat-box">
+          <div class="go-stat-label">Final Score</div>
+          <div class="go-stat-val" id="go-score">0</div>
+        </div>
+        <div class="go-stat-box">
+          <div class="go-stat-label">High Score</div>
+          <div class="go-stat-val" id="go-highscore">0</div>
+        </div>
+        <div class="go-stat-box">
+          <div class="go-stat-label">Targets Cleared</div>
+          <div class="go-stat-val" id="go-kills">0</div>
+        </div>
+        <div class="go-stat-box">
+          <div class="go-stat-label">Live WPM</div>
+          <div class="go-stat-val" id="go-wpm">0</div>
+        </div>
+        <div class="go-stat-box">
+          <div class="go-stat-label">Accuracy</div>
+          <div class="go-stat-val" id="go-acc">100%</div>
+        </div>
+      </div>
+      <button class="draw-btn" id="retry-btn" type="button">PRESS ENTER TO RIDE AGAIN</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+    // =========================================================================
+    // WORD BANKS (Western themed, crisp a-z words & boss standoff phrases)
+    // =========================================================================
+    const FUSE_WORDS = [
+      'spark', 'fuse', 'boom', 'blast', 'nitro', 'flash', 'flame', 'smoke',
+      'bang', 'ash', 'wick', 'char', 'snap', 'bolt', 'ember', 'scorch'
+    ];
+
+    const BANDIT_WORDS = [
+      'outlaw', 'drifter', 'holster', 'canyon', 'mustang', 'spur', 'saddle',
+      'lasso', 'bounty', 'gallop', 'bandana', 'carbine', 'desperado', 'prairie',
+      'varmint', 'rustler', 'buckaroo', 'coyote', 'tumble', 'sixgun', 'duster',
+      'rawhide', 'frontier', 'badlands', 'ambush', 'ricochet', 'wrangler',
+      'sidewinder', 'posse', 'scoundrel', 'gunpowder', 'deadwood', 'stetson',
+      'rattler', 'stagecoach', 'camp', 'ridge', 'gulch', 'corral', 'silver'
+    ];
+
+    const BRUTE_WORDS_1 = [
+      'poncho', 'sombrero', 'ironclad', 'boulder', 'buffalo', 'grizzly',
+      'mammoth', 'granite', 'bastion', 'bulwark', 'shielded', 'armored',
+      'stampeded', 'thunder', 'buckshot', 'fortress'
+    ];
+
+    const BRUTE_WORDS_2 = [
+      'shatter', 'topple', 'crumble', 'vanquish', 'breaker', 'downfall',
+      'justice', 'payback', 'reckon', 'dispatch', 'unmasked', 'exposed',
+      'dustbite', 'sundown', 'verdict', 'silence'
+    ];
+
+    const SHERIFF_PHRASES = [
+      ['drawyouriron', 'highnoonreckoning', 'endoftheroad'],
+      ['dropthatrevolver', 'noescapeoutlaw', 'finalshowdown'],
+      ['silverstarjustice', 'sixfeetofdust', 'tombstonelaw'],
+      ['deadeyevengeance', 'gallowsawait', 'laststandatdusk']
+    ];
+
+    const PICKUP_WHISKEY_WORDS = ['whiskey', 'bourbon', 'tonic', 'elixir', 'rye', 'canteen'];
+    const PICKUP_WATCH_WORDS = ['deadeye', 'chrono', 'watch', 'sundial', 'hour', 'tempo'];
+
+    // =========================================================================
+    // PROCEDURAL WEB AUDIO SYNTHESIZER
+    // =========================================================================
+    class WesternAudio {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      playGunshot() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        // White noise burst for gunpowder crack
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.16);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.035));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1400, now);
+        filter.Q.setValueAtTime(0.9, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.42, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+
+        // Low punch oscillator
+        const osc = this.ctx.createOscillator();
+        const oscGain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(190, now);
+        osc.frequency.exponentialRampToValueAtTime(38, now + 0.11);
+        oscGain.gain.setValueAtTime(0.45, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+        osc.connect(oscGain);
+        oscGain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      }
+
+      playRicochet() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(2400, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.18);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+
+      playHatPop() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+
+      playMisfire() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.setValueAtTime(95, now + 0.03);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+
+      playExplosion() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.45);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.14));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(360, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.55, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.44);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+      }
+
+      playShowdownChime(isBoss = false) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = isBoss ? [220, 293.66, 329.63, 440, 329.63] : [329.63, 440, 493.88, 659.25];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = isBoss ? 'sawtooth' : 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+          gain.gain.setValueAtTime(0.16, now + idx * 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.11 + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.11);
+          osc.stop(now + idx * 0.11 + 0.36);
+        });
+      }
+    }
+
+    const audio = new WesternAudio();
+
+    // =========================================================================
+    // 3D SCENE & RAIL STOPS SETUP
+    // =========================================================================
+    const canvas = document.getElementById('game-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xd96b38);
+    scene.fog = new THREE.FogExp2(0xd96b38, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 160);
+    scene.add(camera);
+
+    // Lighting that shifts from warm sunset to dusk/moonlight across waves
+    const hemiLight = new THREE.HemisphereLight(0xffb76b, 0x472818, 0.85);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xff9e5e, 1.35);
+    sunLight.position.set(-18, 26, -35);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(1024, 1024);
+    scene.add(sunLight);
+
+    // 3-Stop Western Main Street Loop Definition
+    const RAIL_STOPS = [
+      {
+        index: 0,
+        name: 'TOWN GATE',
+        camPos: new THREE.Vector3(0, 2.35, 27),
+        lookAnchor: new THREE.Vector3(0, 2.1, 9),
+        spawnSlots: [
+          new THREE.Vector3(-4.8, 0, 14.5),
+          new THREE.Vector3(4.8, 0, 14.2),
+          new THREE.Vector3(-2.6, 0, 11.2),
+          new THREE.Vector3(2.8, 0, 11.5),
+          new THREE.Vector3(0, 0, 9.5)
+        ]
+      },
+      {
+        index: 1,
+        name: 'SALOON PORCH',
+        camPos: new THREE.Vector3(-3.2, 2.4, 7),
+        lookAnchor: new THREE.Vector3(1.8, 2.1, -6.5),
+        spawnSlots: [
+          new THREE.Vector3(-1.5, 0, -3.5),
+          new THREE.Vector3(4.5, 0, -3.0),
+          new THREE.Vector3(1.2, 0, -6.2),
+          new THREE.Vector3(5.6, 0, -7.2),
+          new THREE.Vector3(-2.2, 0, -7.8)
+        ]
+      },
+      {
+        index: 2,
+        name: 'BANK COURTYARD',
+        camPos: new THREE.Vector3(1.8, 2.45, -12),
+        lookAnchor: new THREE.Vector3(0, 2.2, -26.5),
+        spawnSlots: [
+          new THREE.Vector3(-4.6, 0, -21.5),
+          new THREE.Vector3(4.6, 0, -21.5),
+          new THREE.Vector3(-2.2, 0, -24.5),
+          new THREE.Vector3(2.4, 0, -24.5),
+          new THREE.Vector3(0, 0, -26.8)
+        ]
+      }
+    ];
+
+    function mat(color, roughness = 0.88, metalness = 0.08, emissive = 0x000000) {
+      return new THREE.MeshStandardMaterial({
+        color,
+        roughness,
+        metalness,
+        emissive,
+        flatShading: true
+      });
+    }
+
+    // Build Western Main Street Environment
+    const worldGroup = new THREE.Group();
+    scene.add(worldGroup);
+    const saloonDoors = [];
+    const streetLanterns = [];
+
+    function buildTownEnvironment() {
+      // Sunset backdrop dome
+      const skyGeo = new THREE.SphereGeometry(120, 24, 16);
+      const skyMat = new THREE.MeshBasicMaterial({
+        color: 0xe87a42,
+        side: THREE.BackSide
+      });
+      const skyDome = new THREE.Mesh(skyGeo, skyMat);
+      worldGroup.add(skyDome);
+
+      // Glowing Low Sun Disc on horizon
+      const sunDisc = new THREE.Mesh(
+        new THREE.CircleGeometry(11, 24),
+        new THREE.MeshBasicMaterial({ color: 0xffe082, fog: false })
+      );
+      sunDisc.position.set(0, 14, -95);
+      worldGroup.add(sunDisc);
+
+      // Desert Floor
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(180, 180, 16, 16),
+        mat(0xb86f3f, 0.96, 0.0)
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      worldGroup.add(ground);
+
+      // Dusty Main Street Road Track
+      const road = new THREE.Mesh(
+        new THREE.PlaneGeometry(13, 95),
+        mat(0x8c502b, 0.98, 0.0)
+      );
+      road.rotation.x = -Math.PI / 2;
+      road.position.set(0, 0.02, -4);
+      road.receiveShadow = true;
+      worldGroup.add(road);
+
+      // Distant Mesas / Buttes
+      const mesaPositions = [
+        [-42, 9, -65, 22, 18, 16],
+        [46, 11, -60, 26, 22, 18],
+        [-55, 8, -20, 18, 16, 20],
+        [52, 10, -10, 20, 20, 18]
+      ];
+      mesaPositions.forEach(([x, y, z, w, h, d]) => {
+        const mesa = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(0x874327, 0.95));
+        mesa.position.set(x, y, z);
+        worldGroup.add(mesa);
+      });
+
+      // STOP 0: Town Gate Wooden Archway (around z = 17)
+      const gateGroup = new THREE.Group();
+      const leftPost = new THREE.Mesh(new THREE.BoxGeometry(0.9, 6.2, 0.9), mat(0x4d2c19));
+      leftPost.position.set(-6.2, 3.1, 17);
+      const rightPost = leftPost.clone();
+      rightPost.position.set(6.2, 3.1, 17);
+      const crossBeam = new THREE.Mesh(new THREE.BoxGeometry(14.2, 1.1, 1.1), mat(0x3b2010));
+      crossBeam.position.set(0, 6.1, 17);
+      const signBoard = new THREE.Mesh(new THREE.BoxGeometry(8.5, 1.3, 0.35), mat(0x2a1509));
+      signBoard.position.set(0, 6.9, 17.3);
+      gateGroup.add(leftPost, rightPost, crossBeam, signBoard);
+      worldGroup.add(gateGroup);
+
+      // STOP 1: Red Rock Saloon (Right side of street around x = 8.5, z = -4)
+      const saloonGroup = new THREE.Group();
+      saloonGroup.position.set(8.5, 0, -4);
+      const saloonBody = new THREE.Mesh(new THREE.BoxGeometry(7.5, 6.5, 11), mat(0x7c3f23));
+      saloonBody.position.set(0, 3.25, 0);
+      const saloonFalseFront = new THREE.Mesh(new THREE.BoxGeometry(0.6, 8.4, 11.4), mat(0x5c2c16));
+      saloonFalseFront.position.set(-3.6, 4.2, 0);
+      const porchFloor = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.3, 11.4), mat(0x4a2513));
+      porchFloor.position.set(-5.0, 0.15, 0);
+      const porchRoof = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.35, 11.4), mat(0x3d1e0f));
+      porchRoof.position.set(-5.0, 3.8, 0);
+      saloonGroup.add(saloonBody, saloonFalseFront, porchFloor, porchRoof);
+
+      // Saloon porch pillars
+      [-4.8, 0, 4.8].forEach((pz) => {
+        const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.6, 0.28), mat(0x3a1c0d));
+        pillar.position.set(-6.1, 1.95, pz);
+        saloonGroup.add(pillar);
+      });
+
+      // Swinging Batwing Doors
+      const doorLeft = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.6, 0.85), mat(0x9e582f));
+      doorLeft.position.set(-3.85, 1.3, -0.5);
+      const doorRight = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.6, 0.85), mat(0x9e582f));
+      doorRight.position.set(-3.85, 1.3, 0.5);
+      saloonDoors.push(doorLeft, doorRight);
+      saloonGroup.add(doorLeft, doorRight);
+      worldGroup.add(saloonGroup);
+
+      // Opposite Sheriff Office / General Store on Left side (x = -8.5, z = 2)
+      const storeGroup = new THREE.Group();
+      storeGroup.position.set(-8.5, 0, 2);
+      const storeBody = new THREE.Mesh(new THREE.BoxGeometry(7, 5.5, 10), mat(0x693822));
+      storeBody.position.set(0, 2.75, 0);
+      const storePorch = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.3, 10.2), mat(0x472312));
+      storePorch.position.set(4.6, 0.15, 0);
+      storeGroup.add(storeBody, storePorch);
+      worldGroup.add(storeGroup);
+
+      // Water Tower on Stilts (Left side x = -9.5, z = -12)
+      const towerGroup = new THREE.Group();
+      towerGroup.position.set(-9.5, 0, -12);
+      [[-1.2, -1.2], [1.2, -1.2], [-1.2, 1.2], [1.2, 1.2]].forEach(([lx, lz]) => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 6.2, 6), mat(0x4a2715));
+        leg.position.set(lx, 3.1, lz);
+        towerGroup.add(leg);
+      });
+      const tank = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.1, 3.2, 10), mat(0x6e3d23));
+      tank.position.set(0, 7.4, 0);
+      const tankRoof = new THREE.Mesh(new THREE.ConeGeometry(2.35, 1.4, 10), mat(0x3d2010));
+      tankRoof.position.set(0, 9.7, 0);
+      towerGroup.add(tank, tankRoof);
+      worldGroup.add(towerGroup);
+
+      // STOP 2: First National Bank Facade at end of Main Street (x = 0, z = -31)
+      const bankGroup = new THREE.Group();
+      bankGroup.position.set(0, 0, -31);
+      const bankMain = new THREE.Mesh(new THREE.BoxGeometry(15, 8.2, 7.5), mat(0x9e7b56));
+      bankMain.position.set(0, 4.1, 0);
+      const bankPediment = new THREE.Mesh(new THREE.ConeGeometry(9.5, 2.8, 4), mat(0x7d5d3b));
+      bankPediment.rotation.y = Math.PI / 4;
+      bankPediment.position.set(0, 9.5, 1.2);
+      bankGroup.add(bankMain, bankPediment);
+
+      [-5.2, -2.4, 2.4, 5.2].forEach((cx) => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 7.2, 8), mat(0xd7c19e));
+        col.position.set(cx, 3.6, 3.9);
+        bankGroup.add(col);
+      });
+      worldGroup.add(bankGroup);
+
+      // Cover props: Barrels, Crates, Hitching Posts, Saguaro Cacti
+      const barrelCoords = [
+        [-4.9, 15.2], [4.9, 15.0], [-2.9, 12.0], [3.0, 12.2],
+        [-1.8, -2.5], [4.5, -2.2], [5.4, -6.2],
+        [-4.7, -20.4], [4.7, -20.4], [-2.4, -23.5], [2.4, -23.5]
+      ];
+      barrelCoords.forEach(([bx, bz], i) => {
+        if (i % 2 === 0) {
+          const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, 1.25, 9), mat(0x5e3219));
+          barrel.position.set(bx, 0.62, bz);
+          barrel.castShadow = true;
+          worldGroup.add(barrel);
+        } else {
+          const crate = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), mat(0x6e4124));
+          crate.position.set(bx, 0.55, bz);
+          crate.rotation.y = (i * 0.5) % Math.PI;
+          crate.castShadow = true;
+          worldGroup.add(crate);
+        }
+      });
+
+      // Hitching posts
+      [[-5.2, 8], [5.2, 4], [-5.0, -16], [5.0, -16]].forEach(([hx, hz]) => {
+        const hGroup = new THREE.Group();
+        hGroup.position.set(hx, 0, hz);
+        const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2, 6), mat(0x3d2010));
+        p1.position.set(0, 0.6, -0.9);
+        const p2 = p1.clone();
+        p2.position.set(0, 0.6, 0.9);
+        const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.1, 6), mat(0x4d2914));
+        rail.rotation.x = Math.PI / 2;
+        rail.position.set(0, 1.05, 0);
+        hGroup.add(p1, p2, rail);
+        worldGroup.add(hGroup);
+      });
+
+      // Saguaro Cacti
+      [[-14, 18], [15, 14], [-16, -6], [16, -14], [-13, -25], [14, -26]].forEach(([cx, cz]) => {
+        const cactus = new THREE.Group();
+        cactus.position.set(cx, 0, cz);
+        const cactusMat = mat(0x2e6f40, 0.9);
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 3.6, 7), cactusMat);
+        trunk.position.y = 1.8;
+        const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 1.3, 6), cactusMat);
+        armL.position.set(-0.55, 2.3, 0);
+        const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 1.1, 6), cactusMat);
+        armR.position.set(0.55, 1.9, 0);
+        cactus.add(trunk, armL, armR);
+        worldGroup.add(cactus);
+      });
+
+      // Warm street lanterns
+      [[ -5.5, 3.6, 16 ], [ 5.5, 3.6, -3 ], [ -4.5, 3.6, -20 ]].forEach(([lx, ly, lz]) => {
+        const lanternBulb = new THREE.Mesh(
+          new THREE.SphereGeometry(0.2, 8, 8),
+          new THREE.MeshBasicMaterial({ color: 0xffd54f })
+        );
+        lanternBulb.position.set(lx, ly, lz);
+        const pLight = new THREE.PointLight(0xffab40, 1.4, 18);
+        pLight.position.set(lx, ly, lz);
+        streetLanterns.push(pLight);
+        worldGroup.add(lanternBulb, pLight);
+      });
+    }
+
+    buildTownEnvironment();
+
+    // =========================================================================
+    // FIRST-PERSON PROCEDURAL LOW-POLY SIX-SHOOTER REVOLVER
+    // =========================================================================
+    const gunRig = new THREE.Group();
+    const gunRestPos = new THREE.Vector3(0.46, -0.36, -0.72);
+    const gunRestRot = new THREE.Euler(0.04, -0.12, 0);
+    gunRig.position.copy(gunRestPos);
+    gunRig.rotation.copy(gunRestRot);
+    camera.add(gunRig);
+
+    const gunModel = new THREE.Group();
+    gunRig.add(gunModel);
+
+    // Barrel, cylinder, frame, wood grip, hammer, muzzle flash
+    const steelMat = mat(0x8c969e, 0.35, 0.82);
+    const darkSteelMat = mat(0x3b4248, 0.45, 0.75);
+    const brassMat = mat(0xd4a238, 0.35, 0.85);
+    const gripMat = mat(0x592c16, 0.8, 0.1);
+
+    const gunBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.035, 0.44, 8), steelMat);
+    gunBarrel.rotation.x = Math.PI / 2;
+    gunBarrel.position.set(0, 0.06, -0.22);
+    gunModel.add(gunBarrel);
+
+    const gunEjectorRod = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.34, 6), darkSteelMat);
+    gunEjectorRod.rotation.x = Math.PI / 2;
+    gunEjectorRod.position.set(0, 0.018, -0.20);
+    gunModel.add(gunEjectorRod);
+
+    const gunCylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.15, 6), darkSteelMat);
+    gunCylinderMesh.rotation.x = Math.PI / 2;
+    gunCylinderMesh.position.set(0, 0.03, 0.02);
+    gunModel.add(gunCylinderMesh);
+
+    const gunFrame = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.11, 0.22), steelMat);
+    gunFrame.position.set(0, 0.02, 0.05);
+    gunModel.add(gunFrame);
+
+    const gunStrap = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.04, 0.16), brassMat);
+    gunStrap.position.set(0, -0.045, 0.12);
+    gunModel.add(gunStrap);
+
+    const gunGrip = new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.21, 0.095), gripMat);
+    gunGrip.position.set(0, -0.11, 0.18);
+    gunGrip.rotation.x = -0.38;
+    gunModel.add(gunGrip);
+
+    const gunHammer = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.06, 0.04), darkSteelMat);
+    gunHammer.position.set(0, 0.09, 0.14);
+    gunHammer.rotation.x = -0.35;
+    gunModel.add(gunHammer);
+
+    // Muzzle flash mesh & point light
+    const muzzleFlashMesh = new THREE.Mesh(
+      new THREE.ConeGeometry(0.09, 0.26, 7),
+      new THREE.MeshBasicMaterial({ color: 0xffe082, transparent: true, opacity: 0.92 })
+    );
+    muzzleFlashMesh.rotation.x = -Math.PI / 2;
+    muzzleFlashMesh.position.set(0, 0.06, -0.52);
+    muzzleFlashMesh.visible = false;
+    gunModel.add(muzzleFlashMesh);
+
+    const muzzleLight = new THREE.PointLight(0xffb74d, 0, 8);
+    muzzleLight.position.set(0, 0.06, -0.55);
+    gunModel.add(muzzleLight);
+
+    let gunRecoil = 0;
+    let gunSpinAngle = 0;
+    let muzzleFlashTimer = 0;
+    let cylinderIndex = 0;
+    const activeTracers = [];
+
+    function triggerGunShot(targetWorldPos) {
+      gunRecoil = 1.0;
+      muzzleFlashTimer = 0.065;
+      muzzleFlashMesh.visible = true;
+      muzzleFlashMesh.rotation.z = Math.random() * Math.PI * 2;
+      muzzleLight.intensity = 3.2;
+
+      // Rotate HUD & 3D 6-chamber cylinder
+      cylinderIndex = (cylinderIndex + 1) % 6;
+      gunCylinderMesh.rotation.z = cylinderIndex * (Math.PI / 3);
+      const cylSvg = document.getElementById('cylinder-svg');
+      if (cylSvg) {
+        cylSvg.style.transform = `rotate(${cylinderIndex * 60}deg)`;
+      }
+
+      // Spawn 3D bullet tracer line from gun muzzle to target
+      if (targetWorldPos) {
+        const muzzleWorld = new THREE.Vector3();
+        muzzleFlashMesh.getWorldPosition(muzzleWorld);
+        const pts = [muzzleWorld, targetWorldPos.clone()];
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: 0xffe082,
+          transparent: true,
+          opacity: 0.95
+        });
+        const tracerLine = new THREE.Line(lineGeo, lineMat);
+        scene.add(tracerLine);
+        activeTracers.push({ mesh: tracerLine, life: 0.11, maxLife: 0.11 });
+      }
+    }
+
+    function triggerGunSpin() {
+      gunSpinAngle = Math.PI * 2;
+    }
+
+    // =========================================================================
+    // PROCEDURAL 3D OUTLAW / PICKUP MODELS
+    // =========================================================================
+    function buildOutlawMesh(type) {
+      const root = new THREE.Group();
+      const isBoss = type === 'sheriff';
+      const isBrute = type === 'brute';
+      const isDynamite = type === 'dynamite';
+
+      const scale = isBoss ? 1.24 : isBrute ? 1.15 : 1.0;
+      root.scale.setScalar(scale);
+
+      const bootsMat = mat(0x29150b);
+      const pantsMat = mat(isBoss ? 0x1c1e24 : 0x3b4d5e);
+      const coatMat = mat(isBoss ? 0x1a191e : isBrute ? 0x8f3422 : isDynamite ? 0x8c5828 : 0x7a2822);
+      const skinMat = mat(0xd99b72);
+      const hatMat = mat(isBoss ? 0xf2ead3 : isBrute ? 0xd99f43 : 0x382012);
+
+      // Legs
+      const legL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.75, 0.24), pantsMat);
+      legL.position.set(-0.18, 0.38, 0);
+      const legR = legL.clone();
+      legR.position.set(0.18, 0.38, 0);
+      root.add(legL, legR);
+
+      // Torso
+      const torsoW = isBrute ? 0.86 : 0.64;
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(torsoW, 0.85, 0.4), coatMat);
+      torso.position.set(0, 1.15, 0);
+      root.add(torso);
+
+      // Poncho armor for Brute (removable when word 1 completes)
+      let ponchoMesh = null;
+      if (isBrute) {
+        ponchoMesh = new THREE.Mesh(
+          new THREE.ConeGeometry(0.75, 0.82, 6),
+          mat(0xc96b27)
+        );
+        ponchoMesh.position.set(0, 1.22, 0);
+        root.add(ponchoMesh);
+      }
+
+      // Gold Sheriff Star Badge
+      if (isBoss) {
+        const badge = new THREE.Mesh(new THREE.OctahedronGeometry(0.11, 0), brassMat);
+        badge.position.set(-0.16, 1.32, 0.22);
+        root.add(badge);
+      }
+
+      // Head & Bandana
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), skinMat);
+      head.position.set(0, 1.82, 0);
+      const bandana = new THREE.Mesh(
+        new THREE.BoxGeometry(0.45, 0.2, 0.45),
+        mat(isBoss ? 0xb71c1c : 0x263238)
+      );
+      bandana.position.set(0, 1.72, 0.02);
+      root.add(head, bandana);
+
+      // Cowboy Hat / Sombrero (flies off on kill or Brute armor break)
+      const hatGroup = new THREE.Group();
+      hatGroup.position.set(0, 2.06, 0);
+      const brimRadius = isBrute ? 0.62 : 0.46;
+      const brim = new THREE.Mesh(new THREE.CylinderGeometry(brimRadius, brimRadius, 0.06, 10), hatMat);
+      const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.27, 0.28, 8), hatMat);
+      crown.position.y = 0.15;
+      hatGroup.add(brim, crown);
+      root.add(hatGroup);
+
+      // Arms & Weapon
+      const armR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.62, 0.2), coatMat);
+      armR.position.set(torsoW * 0.5 + 0.1, 1.22, 0.2);
+      armR.rotation.x = -Math.PI / 2.6;
+      const gunProp = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.14, 0.34), darkSteelMat);
+      gunProp.position.set(0, -0.28, 0.12);
+      armR.add(gunProp);
+      root.add(armR);
+
+      return { root, hatGroup, ponchoMesh, headOffset: 2.55 * scale };
+    }
+
+    function buildDynamiteProjectileMesh() {
+      const group = new THREE.Group();
+      const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.52, 8), mat(0xd62828));
+      stick.rotation.z = Math.PI / 4;
+      const spark = new THREE.Mesh(
+        new THREE.SphereGeometry(0.11, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0xffe082 })
+      );
+      spark.position.set(0.22, 0.22, 0);
+      group.add(stick, spark);
+      return { root: group, headOffset: 0.65 };
+    }
+
+    function buildPickupMesh(type) {
+      const group = new THREE.Group();
+      if (type === 'whiskey') {
+        const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.55, 8), mat(0xd97724, 0.3, 0.2));
+        bottle.position.y = 0.9;
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 0.22, 8), mat(0xd97724, 0.3, 0.2));
+        neck.position.y = 1.26;
+        group.add(bottle, neck);
+      } else {
+        const watchBody = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.1, 12), brassMat);
+        watchBody.rotation.x = Math.PI / 2;
+        watchBody.position.y = 1.1;
+        group.add(watchBody);
+      }
+      return { root: group, headOffset: 1.65 };
+    }
+
+    // Flying hat debris particles
+    const flyingDebris = [];
+    function detachAndFlyHat(hatGroup) {
+      if (!hatGroup || !hatGroup.parent) return;
+      const worldPos = new THREE.Vector3();
+      hatGroup.getWorldPosition(worldPos);
+      hatGroup.parent.remove(hatGroup);
+      hatGroup.position.copy(worldPos);
+      scene.add(hatGroup);
+      flyingDebris.push({
+        mesh: hatGroup,
+        vel: new THREE.Vector3((Math.random() - 0.5) * 3.5, 5.2, -2.5),
+        rotVel: new THREE.Vector3(6, 8, 4),
+        life: 0.9
+      });
+    }
+
+    // =========================================================================
+    // GAME STATE & THREAT MANAGEMENT
+    // =========================================================================
+    const labelsLayer = document.getElementById('labels-layer');
+    const HIGHSCORE_KEY = 'gunslinger_highscore';
+
+    const state = {
+      mode: 'start', // 'start' | 'playing' | 'transition' | 'gameover'
+      wave: 1,
+      stopIndex: 0,
+      score: 0,
+      highScore: Number(localStorage.getItem(HIGHSCORE_KEY) || 0),
+      combo: 1,
+      maxCombo: 1,
+      health: 6,
+      maxHealth: 6,
+      totalKeystrokes: 0,
+      correctKeystrokes: 0,
+      wordsCleared: 0,
+      targetsCleared: 0,
+      startTimeMs: 0,
+      elapsedPlaySec: 0,
+      deadeyeTimer: 0,
+      lockedId: null,
+      threats: [],
+      spawnQueue: [],
+      spawnCooldown: 0,
+      nextId: 1,
+      usedInitials: new Set(),
+      transition: {
+        active: false,
+        progress: 0,
+        duration: 1.4,
+        fromPos: new THREE.Vector3(),
+        toPos: new THREE.Vector3(),
+        fromLook: new THREE.Vector3(),
+        toLook: new THREE.Vector3()
+      }
+    };
+
+    const currentLookTarget = new THREE.Vector3();
+    camera.position.copy(RAIL_STOPS[0].camPos);
+    currentLookTarget.copy(RAIL_STOPS[0].lookAnchor);
+    camera.lookAt(currentLookTarget);
+
+    function pickUniqueWord(bank, usedChars) {
+      const shuffled = [...bank].sort(() => Math.random() - 0.5);
+      for (const word of shuffled) {
+        const ch = word[0].toLowerCase();
+        if (!usedChars.has(ch)) {
+          usedChars.add(ch);
+          return word.toLowerCase();
+        }
+      }
+      return shuffled[0].toLowerCase();
+    }
+
+    function applyWaveAtmosphere(waveNum) {
+      // Shift lighting smoothly from sunset (wave 1) -> dusk (wave 3) -> moonlight (wave 5+)
+      const phase = ((waveNum - 1) % 6) / 5;
+      const sunsetColor = new THREE.Color(0xd96b38);
+      const duskColor = new THREE.Color(0x281e3d);
+      const skyCol = sunsetColor.clone().lerp(duskColor, phase);
+      scene.background.copy(skyCol);
+      scene.fog.color.copy(skyCol);
+      hemiLight.intensity = 0.85 - phase * 0.32;
+      sunLight.intensity = 1.35 - phase * 0.6;
+      streetLanterns.forEach((l) => {
+        l.intensity = 1.2 + phase * 1.4;
+      });
+    }
+
+    function showWaveBanner(title, subtitle) {
+      const banner = document.getElementById('wave-banner');
+      document.getElementById('wave-banner-title').textContent = title;
+      document.getElementById('wave-banner-sub').textContent = subtitle;
+      banner.classList.add('visible');
+      setTimeout(() => {
+        banner.classList.remove('visible');
+      }, 2100);
+    }
+
+    function buildWaveQueue(waveNum) {
+      const queue = [];
+      const isBossWave = waveNum % 5 === 0;
+
+      if (isBossWave) {
+        queue.push({ type: 'sheriff' });
+        queue.push({ type: 'bandit' });
+        queue.push({ type: 'dynamite' });
+        queue.push({ type: 'whiskey' });
+      } else {
+        const count = Math.min(3 + waveNum, 9);
+        for (let i = 0; i < count; i++) {
+          if (i === 2 && waveNum >= 2) {
+            queue.push({ type: 'brute' });
+          } else if (i % 3 === 1) {
+            queue.push({ type: 'dynamite' });
+          } else {
+            queue.push({ type: 'bandit' });
+          }
+        }
+        // Add an occasional pickup
+        if (waveNum % 2 === 0) {
+          queue.push({ type: 'whiskey' });
+        } else if (waveNum >= 3) {
+          queue.push({ type: 'watch' });
+        }
+      }
+      return queue;
+    }
+
+    function createThreatDOM(threat) {
+      const el = document.createElement('div');
+      el.className = 'threat-label';
+      if (threat.isPickup) el.classList.add('pickup');
+      if (threat.type === 'sheriff') el.classList.add('boss');
+      el.dataset.threatId = String(threat.id);
+
+      const meta = document.createElement('div');
+      meta.className = 'threat-meta';
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = threat.labelTitle;
+      meta.appendChild(titleSpan);
+
+      if (threat.words.length > 1) {
+        const pips = document.createElement('span');
+        pips.className = 'stage-pips';
+        for (let i = 0; i < threat.words.length; i++) {
+          const pip = document.createElement('span');
+          pip.className = 'stage-pip';
+          pips.appendChild(pip);
+        }
+        meta.appendChild(pips);
+      }
+
+      const box = document.createElement('div');
+      box.className = 'prompt-box';
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('class', 'urgency-ring');
+      svg.setAttribute('viewBox', '0 0 28 28');
+      const bgCircle = document.createElementNS(svgNS, 'circle');
+      bgCircle.setAttribute('class', 'urgency-bg');
+      bgCircle.setAttribute('cx', '14');
+      bgCircle.setAttribute('cy', '14');
+      bgCircle.setAttribute('r', '10');
+      const fgCircle = document.createElementNS(svgNS, 'circle');
+      fgCircle.setAttribute('class', 'urgency-fg');
+      fgCircle.setAttribute('cx', '14');
+      fgCircle.setAttribute('cy', '14');
+      fgCircle.setAttribute('r', '10');
+      const circumference = 2 * Math.PI * 10;
+      fgCircle.style.strokeDasharray = `${circumference}`;
+      fgCircle.style.strokeDashoffset = `${circumference}`;
+      svg.appendChild(bgCircle);
+      svg.appendChild(fgCircle);
+
+      const wordText = document.createElement('div');
+      wordText.className = 'word-text';
+
+      box.appendChild(svg);
+      box.appendChild(wordText);
+      el.appendChild(meta);
+      el.appendChild(box);
+      labelsLayer.appendChild(el);
+
+      threat.dom = { el, fgCircle, wordText, circumference, meta };
+      renderThreatWordDOM(threat);
+    }
+
+    function renderThreatWordDOM(threat) {
+      if (!threat.dom) return;
+      const word = threat.words[threat.wordIndex] || '';
+      const typed = word.slice(0, threat.charIndex);
+      const nextChar = word.slice(threat.charIndex, threat.charIndex + 1);
+      const rem = word.slice(threat.charIndex + 1);
+
+      threat.dom.wordText.innerHTML =
+        `<span class="char-typed">${typed}</span>` +
+        `<span class="char-next">${nextChar}</span>` +
+        `<span class="char-rem">${rem}</span>`;
+
+      const pips = threat.dom.meta.querySelectorAll('.stage-pip');
+      pips.forEach((pip, idx) => {
+        pip.classList.toggle('done', idx < threat.wordIndex);
+        pip.classList.toggle('active', idx === threat.wordIndex);
+      });
+
+      threat.dom.el.classList.toggle('locked', state.lockedId === threat.id);
+    }
+
+    function spawnThreat(type, customWords = null) {
+      const stop = RAIL_STOPS[state.stopIndex];
+      const activeChars = new Set(
+        state.threats.map((t) => (t.words[t.wordIndex] || '')[0]).filter(Boolean)
+      );
+
+      let words = [];
+      let labelTitle = 'BANDIT';
+      let attackDuration = Math.max(5.8, 9.5 - state.wave * 0.25);
+      let isPickup = false;
+
+      if (customWords && customWords.length > 0) {
+        words = customWords.map((w) => w.toLowerCase().replace(/[^a-z]/g, ''));
+      } else if (type === 'bandit') {
+        words = [pickUniqueWord(BANDIT_WORDS, activeChars)];
+        labelTitle = 'BANDIT';
+      } else if (type === 'dynamite') {
+        words = [pickUniqueWord(FUSE_WORDS, activeChars)];
+        labelTitle = 'DYNAMITE';
+        attackDuration = Math.max(4.5, 7.2 - state.wave * 0.18);
+      } else if (type === 'brute') {
+        words = [
+          pickUniqueWord(BRUTE_WORDS_1, activeChars),
+          pickUniqueWord(BRUTE_WORDS_2, activeChars)
+        ];
+        labelTitle = 'PONCHO BRUTE';
+        attackDuration = Math.max(7.2, 11.0 - state.wave * 0.22);
+      } else if (type === 'sheriff') {
+        const phraseSet = SHERIFF_PHRASES[Math.floor(state.wave / 5) % SHERIFF_PHRASES.length];
+        words = [...phraseSet];
+        labelTitle = 'THE SHERIFF';
+        attackDuration = 8.5;
+      } else if (type === 'whiskey') {
+        words = [pickUniqueWord(PICKUP_WHISKEY_WORDS, activeChars)];
+        labelTitle = 'WHISKEY +1 HP';
+        attackDuration = 12.0;
+        isPickup = true;
+      } else if (type === 'watch') {
+        words = [pickUniqueWord(PICKUP_WATCH_WORDS, activeChars)];
+        labelTitle = 'DEADEYE WATCH';
+        attackDuration = 12.0;
+        isPickup = true;
+      }
+
+      // Pick a free spawn slot near current stop
+      const usedSlots = new Set(state.threats.map((t) => t.slotIndex));
+      let slotIndex = 0;
+      if (type === 'sheriff') {
+        slotIndex = 4; // Center standoff slot
+      } else {
+        for (let i = 0; i < stop.spawnSlots.length; i++) {
+          if (!usedSlots.has(i)) {
+            slotIndex = i;
+            break;
+          }
+        }
+      }
+
+      const basePos = stop.spawnSlots[slotIndex].clone();
+      let modelData;
+      if (type === 'dynamite') {
+        modelData = buildDynamiteProjectileMesh();
+      } else if (isPickup) {
+        modelData = buildPickupMesh(type);
+      } else {
+        modelData = buildOutlawMesh(type);
+      }
+
+      modelData.root.position.copy(basePos);
+      modelData.root.lookAt(camera.position.x, basePos.y, camera.position.z);
+      scene.add(modelData.root);
+
+      const threat = {
+        id: state.nextId++,
+        type,
+        labelTitle,
+        isPickup,
+        words,
+        wordIndex: 0,
+        charIndex: 0,
+        slotIndex,
+        basePos: basePos.clone(),
+        pos: basePos.clone(),
+        mesh: modelData.root,
+        hatGroup: modelData.hatGroup || null,
+        ponchoMesh: modelData.ponchoMesh || null,
+        headOffset: modelData.headOffset,
+        timer: 0,
+        attackDuration,
+        dom: null
+      };
+
+      createThreatDOM(threat);
+      state.threats.push(threat);
+      updateBossHUD();
+      updateHUD();
+      return threat;
+    }
+
+    function removeThreat(threat) {
+      if (threat.mesh && threat.mesh.parent) {
+        threat.mesh.parent.remove(threat.mesh);
+      }
+      if (threat.dom && threat.dom.el && threat.dom.el.parentNode) {
+        threat.dom.el.parentNode.removeChild(threat.dom.el);
+      }
+      state.threats = state.threats.filter((t) => t.id !== threat.id);
+      if (state.lockedId === threat.id) {
+        state.lockedId = null;
+      }
+      updateBossHUD();
+      updateHUD();
+    }
+
+    function clearAllThreats() {
+      [...state.threats].forEach((t) => removeThreat(t));
+      state.lockedId = null;
+    }
+
+    function updateBossHUD() {
+      const bossHud = document.getElementById('boss-hud');
+      const bossFill = document.getElementById('boss-bar-fill');
+      const sheriff = state.threats.find((t) => t.type === 'sheriff');
+      if (!sheriff) {
+        bossHud.classList.remove('visible');
+        return;
+      }
+      bossHud.classList.add('visible');
+      const totalChars = sheriff.words.reduce((acc, w) => acc + w.length, 0);
+      let completedChars = 0;
+      for (let i = 0; i < sheriff.wordIndex; i++) {
+        completedChars += sheriff.words[i].length;
+      }
+      completedChars += sheriff.charIndex;
+      const pct = Math.max(0, Math.min(100, ((totalChars - completedChars) / totalChars) * 100));
+      bossFill.style.width = `${pct.toFixed(1)}%`;
+    }
+
+    function updateHUD() {
+      // Hearts
+      const heartsContainer = document.getElementById('hearts-display');
+      heartsContainer.innerHTML = '';
+      for (let i = 0; i < state.maxHealth; i++) {
+        const span = document.createElement('span');
+        span.className = 'heart-icon' + (i >= state.health ? ' empty' : '');
+        span.textContent = '\u2665';
+        heartsContainer.appendChild(span);
+      }
+
+      const stop = RAIL_STOPS[state.stopIndex];
+      document.getElementById('hud-wave').textContent = `WAVE ${state.wave}`;
+      document.getElementById('hud-stop').textContent = stop.name;
+      document.getElementById('hud-score').textContent = String(state.score);
+      document.getElementById('hud-highscore').textContent = String(state.highScore);
+
+      const comboEl = document.getElementById('hud-combo');
+      comboEl.textContent = `x${state.combo}`;
+      comboEl.classList.toggle('combo-hot', state.combo >= 4);
+
+      const minutes = Math.max(state.elapsedPlaySec / 60, 0.05);
+      const wpm = state.correctKeystrokes > 0 ? Math.round((state.correctKeystrokes / 5) / minutes) : 0;
+      const acc = state.totalKeystrokes > 0
+        ? Math.round((state.correctKeystrokes / state.totalKeystrokes) * 100)
+        : 100;
+
+      document.getElementById('hud-wpm').textContent = String(wpm);
+      document.getElementById('hud-acc').textContent = `${acc}%`;
+
+      const hostileLeft = state.threats.filter((t) => !t.isPickup).length +
+        state.spawnQueue.filter((q) => q.type !== 'whiskey' && q.type !== 'watch').length;
+      document.getElementById('hud-remaining').textContent = String(hostileLeft);
+
+      const deadeyePill = document.getElementById('deadeye-pill');
+      const vignette = document.getElementById('fx-vignette');
+      if (state.deadeyeTimer > 0) {
+        deadeyePill.classList.add('visible');
+        document.getElementById('deadeye-timer').textContent = `${state.deadeyeTimer.toFixed(1)}s`;
+        vignette.classList.add('deadeye-active');
+      } else {
+        deadeyePill.classList.remove('visible');
+        vignette.classList.remove('deadeye-active');
+      }
+    }
+
+    function damagePlayer(amount = 1) {
+      if (state.mode !== 'playing') return;
+      state.health = Math.max(0, state.health - amount);
+      state.combo = 1;
+      const vignette = document.getElementById('fx-vignette');
+      vignette.classList.add('damage-flash');
+      setTimeout(() => vignette.classList.remove('damage-flash'), 260);
+      updateHUD();
+
+      if (state.health <= 0) {
+        triggerGameOver('Gunned down in Red Rock Main Street.');
+      }
+    }
+
+    function triggerGameOver(reasonText) {
+      state.mode = 'gameover';
+      clearAllThreats();
+      const minutes = Math.max(state.elapsedPlaySec / 60, 0.05);
+      const wpm = state.correctKeystrokes > 0 ? Math.round((state.correctKeystrokes / 5) / minutes) : 0;
+      const acc = state.totalKeystrokes > 0
+        ? Math.round((state.correctKeystrokes / state.totalKeystrokes) * 100)
+        : 100;
+
+      document.getElementById('gameover-reason').textContent = reasonText;
+      document.getElementById('go-wave').textContent = String(state.wave);
+      document.getElementById('go-score').textContent = String(state.score);
+      document.getElementById('go-highscore').textContent = String(state.highScore);
+      document.getElementById('go-kills').textContent = String(state.targetsCleared);
+      document.getElementById('go-wpm').textContent = String(wpm);
+      document.getElementById('go-acc').textContent = `${acc}%`;
+      document.getElementById('gameover-overlay').classList.remove('hidden');
+    }
+
+    function startWave(waveNum, stopIdx) {
+      state.wave = waveNum;
+      state.stopIndex = stopIdx;
+      state.spawnQueue = buildWaveQueue(waveNum);
+      state.spawnCooldown = 0.15;
+      applyWaveAtmosphere(waveNum);
+
+      const stop = RAIL_STOPS[stopIdx];
+      const isBoss = waveNum % 5 === 0;
+      audio.playShowdownChime(isBoss);
+      showWaveBanner(
+        isBoss ? `WAVE ${waveNum}: SHERIFF STANDOFF` : `WAVE ${waveNum}`,
+        `STOP ${stopIdx + 1}: ${stop.name}`
+      );
+      updateHUD();
+    }
+
+    function advanceToNextWave() {
+      clearAllThreats();
+      const prevStop = RAIL_STOPS[state.stopIndex];
+      const nextStopIndex = (state.stopIndex + 1) % RAIL_STOPS.length;
+      const nextStop = RAIL_STOPS[nextStopIndex];
+
+      state.mode = 'transition';
+      state.transition.active = true;
+      state.transition.progress = 0;
+      state.transition.fromPos.copy(prevStop.camPos);
+      state.transition.toPos.copy(nextStop.camPos);
+      state.transition.fromLook.copy(prevStop.lookAnchor);
+      state.transition.toLook.copy(nextStop.lookAnchor);
+      state.wave += 1;
+      state.stopIndex = nextStopIndex;
+    }
+
+    function startNewGame() {
+      audio.init();
+      clearAllThreats();
+      state.mode = 'playing';
+      state.wave = 1;
+      state.stopIndex = 0;
+      state.score = 0;
+      state.combo = 1;
+      state.maxCombo = 1;
+      state.health = 6;
+      state.totalKeystrokes = 0;
+      state.correctKeystrokes = 0;
+      state.wordsCleared = 0;
+      state.targetsCleared = 0;
+      state.elapsedPlaySec = 0;
+      state.deadeyeTimer = 0;
+      state.transition.active = false;
+
+      camera.position.copy(RAIL_STOPS[0].camPos);
+      currentLookTarget.copy(RAIL_STOPS[0].lookAnchor);
+      camera.lookAt(currentLookTarget);
+
+      document.getElementById('start-overlay').classList.add('hidden');
+      document.getElementById('gameover-overlay').classList.add('hidden');
+
+      startWave(1, 0);
+      // Spawn initial threats immediately so wave 1 is ready for zero-latency typing
+      while (state.threats.length < 3 && state.spawnQueue.length > 0) {
+        const nextSpec = state.spawnQueue.shift();
+        spawnThreat(nextSpec.type);
+      }
+    }
+
+    // =========================================================================
+    // ZERO-LATENCY SYNCHRONOUS TYPING ENGINE
+    // =========================================================================
+    function handleThreatHit(threat) {
+      const currentWord = threat.words[threat.wordIndex];
+      threat.charIndex += 1;
+      state.correctKeystrokes += 1;
+      state.score += 15 * state.combo;
+      if (state.score > state.highScore) {
+        state.highScore = state.score;
+        localStorage.setItem(HIGHSCORE_KEY, String(state.highScore));
+      }
+
+      const aimPoint = threat.pos.clone().add(new THREE.Vector3(0, threat.headOffset * 0.65, 0));
+      triggerGunShot(aimPoint);
+      audio.playGunshot();
+
+      // Completed current word?
+      if (threat.charIndex >= currentWord.length) {
+        state.wordsCleared += 1;
+        state.combo = Math.min(12, state.combo + 1);
+        state.maxCombo = Math.max(state.maxCombo, state.combo);
+        triggerGunSpin();
+
+        // Multi-word enemy progression (Poncho Brute or Sheriff Boss)
+        if (threat.wordIndex + 1 < threat.words.length) {
+          threat.wordIndex += 1;
+          threat.charIndex = 0;
+          threat.timer = Math.max(0, threat.timer - threat.attackDuration * 0.45);
+          audio.playRicochet();
+
+          // Poncho Brute loses hat & poncho on first word clear!
+          if (threat.type === 'brute' && threat.wordIndex === 1) {
+            if (threat.ponchoMesh && threat.ponchoMesh.parent) {
+              threat.ponchoMesh.parent.remove(threat.ponchoMesh);
+            }
+            detachAndFlyHat(threat.hatGroup);
+          }
+          renderThreatWordDOM(threat);
+          updateBossHUD();
+          updateHUD();
+          return;
+        }
+
+        // Threat or Pickup completely finished!
+        state.targetsCleared += 1;
+        state.score += (threat.type === 'sheriff' ? 500 : threat.type === 'brute' ? 200 : 100) * state.combo;
+        if (state.score > state.highScore) {
+          state.highScore = state.score;
+          localStorage.setItem(HIGHSCORE_KEY, String(state.highScore));
+        }
+
+        if (threat.type === 'whiskey') {
+          state.health = Math.min(state.maxHealth, state.health + 1);
+          audio.playHatPop();
+        } else if (threat.type === 'watch') {
+          state.deadeyeTimer = 6.0;
+          audio.playShowdownChime(false);
+        } else if (threat.type === 'dynamite') {
+          audio.playExplosion();
+        } else {
+          detachAndFlyHat(threat.hatGroup);
+          audio.playHatPop();
+        }
+
+        removeThreat(threat);
+
+        // Check if wave is cleared
+        const remainingHostiles = state.threats.filter((t) => !t.isPickup).length +
+          state.spawnQueue.filter((q) => q.type !== 'whiskey' && q.type !== 'watch').length;
+        if (remainingHostiles === 0 && state.mode === 'playing') {
+          advanceToNextWave();
+        }
+      } else {
+        renderThreatWordDOM(threat);
+        updateBossHUD();
+        updateHUD();
+      }
+    }
+
+    function processTypingKey(rawKey) {
+      if (state.mode === 'start' || state.mode === 'gameover') {
+        if (rawKey === 'Enter') {
+          startNewGame();
+        }
+        return false;
+      }
+
+      if (state.mode !== 'playing') return false;
+
+      if (rawKey === 'Tab' || rawKey === 'Escape') {
+        state.lockedId = null;
+        state.threats.forEach((t) => renderThreatWordDOM(t));
+        return true;
+      }
+
+      if (!/^[a-zA-Z]$/.test(rawKey)) return false;
+      const ch = rawKey.toLowerCase();
+      state.totalKeystrokes += 1;
+
+      let locked = state.threats.find((t) => t.id === state.lockedId) || null;
+
+      // If no target is locked, find nearest threat whose current word starts with `ch`
+      if (!locked) {
+        const candidates = state.threats.filter((t) => {
+          const w = t.words[t.wordIndex] || '';
+          return w[t.charIndex] === ch;
+        });
+
+        if (candidates.length > 0) {
+          candidates.sort((a, b) => {
+            const distA = a.pos.distanceToSquared(camera.position);
+            const distB = b.pos.distanceToSquared(camera.position);
+            return distA - distB;
+          });
+          locked = candidates[0];
+          state.lockedId = locked.id;
+          state.threats.forEach((t) => renderThreatWordDOM(t));
+          handleThreatHit(locked);
+          return true;
+        } else {
+          // Typo when unlocked
+          state.combo = 1;
+          audio.playMisfire();
+          updateHUD();
+          return false;
+        }
+      }
+
+      // Target already locked: check next expected character
+      const currentWord = locked.words[locked.wordIndex] || '';
+      const expected = currentWord[locked.charIndex];
+      if (ch === expected) {
+        handleThreatHit(locked);
+        return true;
+      } else {
+        // Misfire on locked target
+        state.combo = 1;
+        audio.playMisfire();
+        if (locked.dom && locked.dom.el) {
+          locked.dom.el.classList.remove('misfire');
+          void locked.dom.el.offsetWidth;
+          locked.dom.el.classList.add('misfire');
+        }
+        updateHUD();
+        return false;
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Enter' || /^[a-zA-Z]$/.test(e.key)) {
+        if (e.key === 'Tab') e.preventDefault();
+        processTypingKey(e.key);
+      }
+    });
+
+    document.getElementById('start-btn').addEventListener('click', () => startNewGame());
+    document.getElementById('retry-btn').addEventListener('click', () => startNewGame());
+
+    // =========================================================================
+    // SIMULATION STEP & 3D -> 2D LABEL PROJECTION
+    // =========================================================================
+    function updateLabelsProjection() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const projVec = new THREE.Vector3();
+
+      for (const threat of state.threats) {
+        if (!threat.dom) continue;
+        projVec.copy(threat.pos);
+        projVec.y += threat.headOffset;
+        projVec.project(camera);
+
+        if (projVec.z > 1) {
+          threat.dom.el.style.display = 'none';
+          continue;
+        }
+
+        threat.dom.el.style.display = 'flex';
+        const x = Math.max(85, Math.min(width - 85, (projVec.x * 0.5 + 0.5) * width));
+        const y = Math.max(55, Math.min(height - 55, (-projVec.y * 0.5 + 0.5) * height));
+        threat.dom.el.style.left = `${x}px`;
+        threat.dom.el.style.top = `${y}px`;
+
+        const ratio = Math.min(1, threat.timer / threat.attackDuration);
+        const offset = threat.dom.circumference * (1 - ratio);
+        threat.dom.fgCircle.style.strokeDashoffset = `${offset}`;
+        if (threat.isPickup) {
+          threat.dom.fgCircle.style.stroke = '#7ae582';
+        } else if (ratio > 0.72) {
+          threat.dom.fgCircle.style.stroke = '#e63946';
+        } else if (ratio > 0.45) {
+          threat.dom.fgCircle.style.stroke = '#d97724';
+        } else {
+          threat.dom.fgCircle.style.stroke = '#f5b942';
+        }
+      }
+    }
+
+    function stepSimulation(dt) {
+      // Animate swinging saloon doors
+      const timeNow = performance.now() * 0.001;
+      saloonDoors.forEach((door, idx) => {
+        door.rotation.y = Math.sin(timeNow * 1.8 + idx * Math.PI) * 0.25;
+      });
+
+      // Update gun recoil, spin, muzzle flash, and bullet tracers
+      if (muzzleFlashTimer > 0) {
+        muzzleFlashTimer -= dt;
+        if (muzzleFlashTimer <= 0) {
+          muzzleFlashMesh.visible = false;
+          muzzleLight.intensity = 0;
+        }
+      }
+      if (gunRecoil > 0) {
+        gunRecoil = Math.max(0, gunRecoil - dt * 7.5);
+      }
+      if (gunSpinAngle > 0) {
+        gunSpinAngle = Math.max(0, gunSpinAngle - dt * 16.0);
+      }
+      gunRig.position.set(
+        gunRestPos.x,
+        gunRestPos.y + gunRecoil * 0.045,
+        gunRestPos.z + gunRecoil * 0.09
+      );
+      gunRig.rotation.set(
+        gunRestRot.x + gunRecoil * 0.38 + gunSpinAngle,
+        gunRestRot.y,
+        gunRestRot.z
+      );
+
+      for (let i = activeTracers.length - 1; i >= 0; i--) {
+        const tr = activeTracers[i];
+        tr.life -= dt;
+        if (tr.life <= 0) {
+          scene.remove(tr.mesh);
+          activeTracers.splice(i, 1);
+        } else {
+          tr.mesh.material.opacity = tr.life / tr.maxLife;
+        }
+      }
+
+      for (let i = flyingDebris.length - 1; i >= 0; i--) {
+        const d = flyingDebris[i];
+        d.life -= dt;
+        d.vel.y -= 12 * dt;
+        d.mesh.position.addScaledVector(d.vel, dt);
+        d.mesh.rotation.x += d.rotVel.x * dt;
+        d.mesh.rotation.y += d.rotVel.y * dt;
+        if (d.life <= 0) {
+          scene.remove(d.mesh);
+          flyingDebris.splice(i, 1);
+        }
+      }
+
+      // Rail Camera Glide Transition between waves
+      if (state.mode === 'transition' && state.transition.active) {
+        state.transition.progress += dt / state.transition.duration;
+        const t = Math.min(1, state.transition.progress);
+        const smooth = t * t * (3 - 2 * t);
+        camera.position.lerpVectors(state.transition.fromPos, state.transition.toPos, smooth);
+        currentLookTarget.lerpVectors(state.transition.fromLook, state.transition.toLook, smooth);
+        camera.lookAt(currentLookTarget);
+
+        if (t >= 1) {
+          state.transition.active = false;
+          state.mode = 'playing';
+          startWave(state.wave, state.stopIndex);
+        }
+        return;
+      }
+
+      if (state.mode !== 'playing') return;
+
+      state.elapsedPlaySec += dt;
+
+      if (state.deadeyeTimer > 0) {
+        state.deadeyeTimer = Math.max(0, state.deadeyeTimer - dt);
+        updateHUD();
+      }
+
+      const threatTimeScale = state.deadeyeTimer > 0 ? 0.35 : 1.0;
+
+      // Spawn new threats from wave queue up to max active limit
+      const maxSimultaneous = state.wave % 5 === 0 ? 3 : Math.min(4, 2 + Math.floor(state.wave / 2));
+      state.spawnCooldown -= dt;
+      if (state.spawnCooldown <= 0 && state.spawnQueue.length > 0 && state.threats.length < maxSimultaneous) {
+        const nextSpec = state.spawnQueue.shift();
+        spawnThreat(nextSpec.type);
+        state.spawnCooldown = 1.1;
+      }
+
+      // Smoothly pan camera toward locked target (or nearest urgent threat / rail lookAnchor)
+      const stop = RAIL_STOPS[state.stopIndex];
+      const lockedThreat = state.threats.find((t) => t.id === state.lockedId);
+      const desiredLook = stop.lookAnchor.clone();
+      if (lockedThreat) {
+        desiredLook.lerp(lockedThreat.pos.clone().add(new THREE.Vector3(0, 1.4, 0)), 0.42);
+      }
+      currentLookTarget.lerp(desiredLook, Math.min(1, dt * 6.5));
+      camera.lookAt(currentLookTarget);
+
+      // Update active threats
+      for (const threat of [...state.threats]) {
+        threat.timer += dt * threatTimeScale;
+        const ratio = Math.min(1, threat.timer / threat.attackDuration);
+
+        if (threat.type === 'dynamite') {
+          // Parabolic arc from spawn point toward camera
+          const targetEnd = camera.position.clone().add(new THREE.Vector3(0, -0.3, -1.8));
+          threat.pos.lerpVectors(threat.basePos, targetEnd, ratio);
+          threat.pos.y = threat.basePos.y + 1.1 + Math.sin(ratio * Math.PI) * 3.6;
+          threat.mesh.position.copy(threat.pos);
+          threat.mesh.rotation.x += dt * 7;
+          threat.mesh.rotation.z += dt * 5;
+        } else if (threat.isPickup) {
+          threat.pos.copy(threat.basePos);
+          threat.mesh.position.copy(threat.pos);
+          threat.mesh.rotation.y += dt * 1.8;
+        } else {
+          // Outlaw steps out from cover and sways slightly
+          const stepOut = Math.min(1, threat.timer * 2.2);
+          threat.pos.copy(threat.basePos);
+          threat.pos.x += Math.sin(stepOut * Math.PI * 0.5) * 0.45;
+          threat.mesh.position.copy(threat.pos);
+          threat.mesh.lookAt(camera.position.x, threat.pos.y, camera.position.z);
+        }
+
+        // Check timer completion
+        if (threat.timer >= threat.attackDuration) {
+          if (threat.isPickup) {
+            removeThreat(threat);
+          } else if (threat.type === 'dynamite') {
+            audio.playExplosion();
+            removeThreat(threat);
+            damagePlayer(1);
+            if (state.mode === 'playing') {
+              const remHostiles = state.threats.filter((t) => !t.isPickup).length +
+                state.spawnQueue.filter((q) => q.type !== 'whiskey' && q.type !== 'watch').length;
+              if (remHostiles === 0) advanceToNextWave();
+            }
+          } else {
+            // Bandit, Brute, or Sheriff fires a shot at the player and resets attack timer
+            threat.timer = 0;
+            audio.playGunshot();
+            damagePlayer(1);
+          }
+        }
+      }
+
+      updateLabelsProjection();
+    }
+
+    let lastFrameTime = performance.now();
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
+      lastFrameTime = now;
+      stepSimulation(dt);
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      updateLabelsProjection();
+    });
+
+    updateHUD();
+    requestAnimationFrame(animate);
+
+    // =========================================================================
+    // DETERMINISTIC DEBUG / TEST HOOK (window.__gunslinger)
+    // =========================================================================
+    window.__gunslinger = {
+      getState() {
+        const stop = RAIL_STOPS[state.stopIndex];
+        return {
+          mode: state.mode,
+          wave: state.wave,
+          stopIndex: state.stopIndex,
+          stopName: stop ? stop.name : '',
+          score: state.score,
+          highScore: state.highScore,
+          combo: state.combo,
+          maxCombo: state.maxCombo,
+          health: state.health,
+          maxHealth: state.maxHealth,
+          wordsCleared: state.wordsCleared,
+          targetsCleared: state.targetsCleared,
+          deadeyeTimer: state.deadeyeTimer,
+          lockedId: state.lockedId,
+          bossActive: state.threats.some((t) => t.type === 'sheriff'),
+          activeThreats: state.threats.map((t) => ({
+            id: t.id,
+            type: t.type,
+            isPickup: t.isPickup,
+            words: t.words,
+            wordIndex: t.wordIndex,
+            currentWord: t.words[t.wordIndex],
+            charIndex: t.charIndex,
+            remainingText: (t.words[t.wordIndex] || '').slice(t.charIndex),
+            timer: t.timer,
+            attackDuration: t.attackDuration
+          }))
+        };
+      },
+      startGame() {
+        startNewGame();
+        return this.getState();
+      },
+      typeKey(k) {
+        processTypingKey(k);
+        updateLabelsProjection();
+        return this.getState();
+      },
+      typeText(str) {
+        for (const ch of str) {
+          processTypingKey(ch);
+        }
+        updateLabelsProjection();
+        return this.getState();
+      },
+      spawnThreat(type, customWords) {
+        const t = spawnThreat(type, customWords);
+        updateLabelsProjection();
+        return t ? t.id : null;
+      },
+      jumpToWave(waveNum) {
+        clearAllThreats();
+        state.mode = 'playing';
+        const stopIdx = (waveNum - 1) % RAIL_STOPS.length;
+        camera.position.copy(RAIL_STOPS[stopIdx].camPos);
+        currentLookTarget.copy(RAIL_STOPS[stopIdx].lookAnchor);
+        camera.lookAt(currentLookTarget);
+        startWave(waveNum, stopIdx);
+        while (state.threats.length < 3 && state.spawnQueue.length > 0) {
+          const nextSpec = state.spawnQueue.shift();
+          spawnThreat(nextSpec.type);
+        }
+        updateLabelsProjection();
+        return this.getState();
+      },
+      completeCurrentWave() {
+        let guard = 0;
+        while (state.mode === 'playing' && guard < 100) {
+          guard++;
+          while (state.spawnQueue.length > 0 && state.threats.length < 4) {
+            const nextSpec = state.spawnQueue.shift();
+            spawnThreat(nextSpec.type);
+          }
+          const hostile = state.threats.find((t) => !t.isPickup);
+          if (!hostile) break;
+          while (state.threats.includes(hostile) && state.mode === 'playing') {
+            const rem = (hostile.words[hostile.wordIndex] || '').slice(hostile.charIndex);
+            if (!rem) break;
+            this.typeText(rem);
+          }
+        }
+        return this.getState();
+      },
+      advanceTime(seconds) {
+        const steps = Math.max(1, Math.ceil(seconds / 0.05));
+        const stepDt = seconds / steps;
+        for (let i = 0; i < steps; i++) {
+          stepSimulation(stepDt);
+        }
+        renderer.render(scene, camera);
+        updateLabelsProjection();
+        return this.getState();
+      }
+    };
+  </script>
+</body>
+</html>
