@@ -1509,7 +1509,6 @@ permalink: /gunslinger/
       correctKeystrokes: 0,
       wordsCleared: 0,
       targetsCleared: 0,
-      startTimeMs: 0,
       elapsedPlaySec: 0,
       deadeyeTimer: 0,
       lockedId: null,
@@ -1517,7 +1516,6 @@ permalink: /gunslinger/
       spawnQueue: [],
       spawnCooldown: 0,
       nextId: 1,
-      usedInitials: new Set(),
       transition: {
         active: false,
         progress: 0,
@@ -1561,13 +1559,19 @@ permalink: /gunslinger/
       });
     }
 
+    let waveBannerTimeout = null;
+
     function showWaveBanner(title, subtitle) {
       const banner = document.getElementById('wave-banner');
       document.getElementById('wave-banner-title').textContent = title;
       document.getElementById('wave-banner-sub').textContent = subtitle;
       banner.classList.add('visible');
-      setTimeout(() => {
+      if (waveBannerTimeout !== null) {
+        clearTimeout(waveBannerTimeout);
+      }
+      waveBannerTimeout = setTimeout(() => {
         banner.classList.remove('visible');
+        waveBannerTimeout = null;
       }, 2100);
     }
 
@@ -1693,9 +1697,7 @@ permalink: /gunslinger/
       let attackDuration = Math.max(5.8, 9.5 - state.wave * 0.25);
       let isPickup = false;
 
-      if (customWords && customWords.length > 0) {
-        words = customWords.map((w) => w.toLowerCase().replace(/[^a-z]/g, ''));
-      } else if (type === 'bandit') {
+      if (type === 'bandit') {
         words = [pickUniqueWord(BANDIT_WORDS, activeChars)];
         labelTitle = 'BANDIT';
       } else if (type === 'dynamite') {
@@ -1724,6 +1726,10 @@ permalink: /gunslinger/
         labelTitle = 'DEADEYE WATCH';
         attackDuration = 12.0;
         isPickup = true;
+      }
+
+      if (customWords && customWords.length > 0) {
+        words = customWords.map((w) => w.toLowerCase().replace(/[^a-z]/g, ''));
       }
 
       // Pick a free spawn slot near current stop
