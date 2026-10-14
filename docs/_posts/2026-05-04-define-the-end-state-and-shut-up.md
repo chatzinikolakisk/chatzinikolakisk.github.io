@@ -9,29 +9,9 @@ Someone gave my team an ultimatum on a PHP version upgrade. "Either today or Mon
 
 I sat there listening to them reconstruct the story and felt something I'm still processing: pride, yes, but also a strange kind of vertigo. My team had used a principle I'd been teaching them for months, applied it under real pressure, and I hadn't been in the room.
 
-## The hundred-page document
-
-It started about a month earlier, in a meeting about engineering standards.
-
-We'd been handed a comprehensive document. Seven sections. Dozens of pages. Coding conventions, architecture principles, review processes, deployment practices. It was meant to be the thing that unified our engineering teams across multiple products.
-
-I read it and my first reaction was: this is a textbook pretending to be a standard.
-
-The content wasn't wrong. Most of it was thoughtful. The problem was that nobody could tell me which parts were actual requirements and which parts were one person's preferred way of working. A junior engineer reading this document would have no idea what was mandatory and what was aspirational. (A senior engineer, honestly, wouldn't finish it.)
-
-I told the group: "If this is a hundred, we need something at twenty."
-
-What followed was a conversation about how to define standards that people would actually follow. The position I kept coming back to was almost embarrassingly simple: define the end state, shut up about the path.
-
-Tell teams what must be true. Maybe ten things. Non-negotiable, short enough that everyone reads them, strict enough that nobody escapes them. Not "good test coverage." Something like: every production change has a rollback path. Every service has a named on-call owner. Every bug fix references the bug. Things you can hold up against an artifact and check, yes or no.
-
-Don't tell them how to get there. The maturity tiers, the migration plans, the per-team baseline assessments, the enforcement timelines: in this context they were substituting for trust. If you have to design a compliance system to make people follow your standard, the problem is probably not the people.
-
-The litmus test I keep coming back to is what a stranger would extract from the artifact. Take a document, a process, a decision. Imagine a senior engineer arriving in three months who wasn't in any of the conversations. What do they get from the written thing? If the answer is "nothing clean," you've defined the path, not the end state.
-
 ## What it looks like when it travels
 
-A few weeks after the standards meeting, a different team was handed the PHP8 ultimatum I opened this post with.
+The principle is simple: define the end state, shut up about the path. That PHP8 ultimatum was the first time I watched it travel without me.
 
 Today or Monday. Take it or leave it. The kind of pressure that, six months earlier, would have arrived in my inbox as an escalation before lunch. This time it didn't. The team's most experienced engineer chose Monday on the call to buy thinking time, then brought it back to the team. They mapped the actual work, identified the risk windows, drafted a counter-proposal, and went back with it as a group. They didn't argue against the upgrade. They argued against the date. They won.
 
@@ -63,7 +43,7 @@ That took guts to say. And it was true. This was a team where the end state had 
 
 "Define the end state" assumes a baseline. People know each other well enough to collaborate, trust each other enough to disagree, and have enough shared context to make independent decisions that don't contradict each other. For one of my teams, that baseline was rock solid. For another, it was still being built.
 
-The temptation, when the philosophy doesn't work immediately, is to add process. Build tiers. Create checklists. Impose timelines. The same reflexes I'd rejected in that hundred-page document, suddenly attractive again now that the discomfort is mine.
+The temptation, when the philosophy doesn't work immediately, is to add process. Build tiers. Create checklists. Impose timelines. The same reflexes I always push back on, suddenly attractive now that the discomfort is mine.
 
 But the answer isn't more process. It's patience. The intern who named the identity gap did something more valuable than any migration plan: he made the problem visible. Now the team can work on it. In their own way. At their own pace.
 

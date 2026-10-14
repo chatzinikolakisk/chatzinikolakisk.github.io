@@ -33,7 +33,7 @@ When I'm in the room (or in the Slack channel, or on the calendar), my leads kno
 
 But safety has a side effect. When the backstop is always there, people lean on it. Not consciously. Not lazily. Just naturally, the same way you drive differently when the road has guardrails.
 
-My absence removed the guardrails. And instead of driving off the cliff, my leads drove more carefully — the consequences were suddenly theirs. The most mature leadership email of one lead's career was sent at 5:29am on a day he knew I wouldn't see it until later. The QA lead's accountability email was CC'd to me but not written for me. The engineer's product write-up was posted in a channel I wasn't monitoring.
+My absence removed the guardrails. And instead of driving off the cliff, my leads drove more carefully: the consequences were suddenly theirs. The most mature leadership email of one lead's career was sent at 5:29am on a day he knew I wouldn't see it until later. The QA lead's accountability email was CC'd to me but not written for me. The engineer's product write-up was posted in a channel I wasn't monitoring.
 
 My presence gives safety. My absence gives permission.
 
@@ -42,10 +42,6 @@ My presence gives safety. My absence gives permission.
 If the story ended there, it would be too clean. A neat parable about letting go. The kind of thing that fits on a LinkedIn post.
 
 The same week, the same team whose lead sent that powerful 5:29am email was dealing with an attendance crisis. People not showing up to the office. A team that can run its technical governance without its director still can't self-organise on basic attendance norms. Autonomy without reliability is one dimension of maturity, not maturity itself.
-
-And on another team, an intern said something in a retro that stopped the room. "I look at us and I don't feel like we're a team. Everyone works on different things. People feel like strangers."
-
-That took real courage. The team that hasn't passed the absence test yet produced the most honest self-assessment of all three. Sometimes the team that names its own failure is further along than the team that doesn't notice.
 
 ## The pattern underneath the pattern
 

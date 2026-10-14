@@ -59,7 +59,7 @@ We've gotten great feedback about our process from candidates, which makes us fe
 
 ## The Never-Ending Story
 
-Will we change our approach again? Actually, we already are. Vassilis Poursalidis, our Engineering Director, is spearheading a new unified approach that goes live-by-default for everyone—frontend, backend, QA, the whole crew. Because here's the thing about working in tech: the moment you think you've got it figured out, the ground shifts. The process that works today might be laughable tomorrow. And that's actually... kind of exciting?
+Will we change our approach again? Actually, we already are. Vassilis Poursalidis, our Engineering Director, is spearheading a new unified approach that goes live-by-default for everyone: frontend, backend, QA, the whole crew. Because here's the thing about working in tech: the moment you think you've got it figured out, the ground shifts. The process that works today might be laughable tomorrow. And that's actually... kind of exciting?
 
 We're not adapting because we have to survive. We're adapting because it's interesting, because we're curious, because every failure teaches us something new. Even when those failures are spectacular.
 
