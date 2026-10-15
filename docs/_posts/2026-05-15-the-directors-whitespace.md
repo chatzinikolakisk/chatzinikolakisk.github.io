@@ -15,10 +15,6 @@ Thirty-to-sixty-minute calendar cracks are too short for features, which is why 
 
 The Tuesday pair review did different work. Reviewing shipped code without a release deadline lets you debate design instead of policing style. Near the end, I told him: "My collaboration with you will have succeeded if, whenever you next update your CV, you have more to write." He now leads the architecture for his squad's next major integration, and those validator patterns show up across the team's PRs unprompted.
 
-## What the silence still needs from you
+## The catch with quiet teams
 
-Those calendar cracks only exist because my three teams now ship 25 PRs and 50 tasks a day without escalating. With that reclaimed capacity, my job shifts to the two things autonomous teams do not build for themselves.
-
-First is outward legibility and goal ownership. To me, a quiet week means the structure is holding; to a new VP in week one, that silence looks like a data void. And when 359 tasks move in two weeks while I am the only one asking if our OKRs are wired up, execution has drifted from direction. I had to coach my leads to broadcast delivery and risks upward, and to own whether the roadmap works, not just whether it ships.
-
-Second is naming the product-identity question ("are we one product or two?") hidden underneath circular architecture debates. When rooms loop for months on mobile frameworks or shared components, the blocker is rarely technical. Once leadership named a unified suite model (shared backend, subscription-gated UI), months of technical arguments resolved in five minutes.
+Those calendar cracks only exist because my three teams run their own ceremonies and ship without me firefighting. That quiet autonomy comes with one real catch: outward legibility. To anyone who watched the transition over six months, a quiet week means the structure is holding. To a new VP in week one, with zero accumulated context, that same silence looks like a data void. The fix was not writing top-down status digests myself; it was coaching my leads to broadcast their own delivery and risks upward as part of running an autonomous team.
