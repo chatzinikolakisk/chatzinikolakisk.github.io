@@ -1,0 +1,13 @@
+# Projects shown on /projects/.
+# Add a new entry at the top. Fields:
+#   title, url, date (YYYY-MM-DD), kind (game, experiment, idea, tool),
+#   status (live, wip, idea), tags (list), summary (one or two short sentences).
+- title: Gunslinger
+  url: /gunslinger/
+  date: 2026-10-15
+  kind: game
+  status: live
+  tags: [three.js, typing, browser game]
+  summary: >-
+    A 3D western typing showdown. Type outlaw words before their attack rings
+    close, and face the Sheriff every fifth wave. Best on a desktop keyboard.
