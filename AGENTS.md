@@ -65,6 +65,7 @@ docker run --rm -it --entrypoint rendercv \
 
 ### Projects
 - Data: `docs/_data/projects.yml` (newest first; fields documented at the top). Page: `docs/projects.md` -> `/projects/`.
+- Optional `thumbnail`: a ~16:9 image in `docs/assets/projects/` (webp or jpg, under ~150 KB), referenced as `/assets/projects/<slug>.webp`. Shown left of the text on desktop and on top on mobile; entries without one render as text-only cards.
 
 ### CV
 - Source: `cv/resume.yaml` (RenderCV, `classic` theme; sole canonical source).
