@@ -14,7 +14,8 @@ of building software.
 [Download CV (PDF)](/assets/Konstantinos_Chatzinikolakis_CV.pdf) ·
 [Email](mailto:chatzinikolakisk@gmail.com) ·
 [LinkedIn](https://www.linkedin.com/in/chatzinikolakisk) ·
-[GitHub](https://github.com/chatzinikolakisk)
+[GitHub](https://github.com/chatzinikolakisk) ·
+[Goodreads](https://www.goodreads.com/user/show/61566656)
 
 ## Recent posts
 
